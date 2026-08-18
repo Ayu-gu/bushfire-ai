@@ -100,8 +100,24 @@ def build_weather_features(
         x for x in humidity if x is not None
     ]
 
+    target_datetime = datetime.strptime(target_date, "%Y-%m-%d")
+    month = target_datetime.month
+    day_of_year = target_datetime.timetuple().tm_yday
+
+    if month in (12, 1, 2):
+        season = 0
+    elif month in (3, 4, 5):
+        season = 1
+    elif month in (6, 7, 8):
+        season = 2
+    else:
+        season = 3
+
     return {
         "date": target_date,
+        "month": month,
+        "day_of_year": day_of_year,
+        "season": season,
         "latitude": latitude,
         "longitude": longitude,
 

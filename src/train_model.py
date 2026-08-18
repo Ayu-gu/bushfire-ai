@@ -22,9 +22,12 @@ print("Using device:", device)
 # LOAD DATA
 # -------------------------
 
-df = pd.read_csv("data/balanced_sample.csv")
+df = pd.read_csv("data/training_dataset_v02.csv")
 
 features = [
+    "month",
+    "day_of_year",
+    "season",
     "max_temp",
     "min_temp",
     "avg_humidity",
@@ -97,7 +100,7 @@ class BushfireModel(nn.Module):
         super().__init__()
 
         self.network = nn.Sequential(
-            nn.Linear(8, 16),
+            nn.Linear(11, 16),
             nn.ReLU(),
 
             nn.Linear(16, 8),
