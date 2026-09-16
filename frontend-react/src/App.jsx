@@ -1,3 +1,4 @@
+const DEV_MODE = false;
 import { useState } from "react";
 import { useMap } from "react-leaflet";
 import {
@@ -9,6 +10,8 @@ import {
 
 import "leaflet/dist/leaflet.css";
 import "./App.css";
+import NetworkVisualizer
+  from "./components/NetworkVisualizer";
 
 
 function LocationSelector({ setLocation }) {
@@ -173,6 +176,13 @@ function App() {
             </MapContainer>
 
           </section>
+          {DEV_MODE && (
+            <NetworkVisualizer
+            activations={result?.activations}
+            riskScore={result?.risk_score}
+            riskLevel={result?.risk_level}
+            />
+          )}
 
 
           <section className="risk-card">
@@ -222,21 +232,21 @@ function App() {
               <div>
                 <span>Temperature</span>
                 <strong>
-                  {result ? `${result.max_temp}°C` : "--"}
+                  {result ? `${result.current_temp}°C` : "--"}
                 </strong>
               </div>
 
               <div>
                 <span>Humidity</span>
                 <strong>
-                  {result ? `${result.avg_humidity}%` : "--"}
+                  {result ? `${result.current_humidity}%` : "--"}
                 </strong>
               </div>
 
               <div>
                 <span>Wind</span>
                 <strong>
-                  {result ? `${result.max_wind} km/h` : "--"}
+                  {result ? `${result.current_wind} km/h` : "--"}
                 </strong>
               </div>
 

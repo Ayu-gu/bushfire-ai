@@ -4,6 +4,7 @@ import torch
 import torch.nn as nn
 import numpy as np
 
+from fetch_bom_observations import find_nearest_station
 from datetime import datetime, timedelta
 
 
@@ -152,6 +153,12 @@ def fetch_recent_weather(
     "latitude": latitude,
     "longitude": longitude,
 
+    "current": [
+    "temperature_2m",
+    "relative_humidity_2m",
+    "wind_speed_10m",
+    ],
+
     "daily": [
         "temperature_2m_max",
         "temperature_2m_min",
@@ -188,13 +195,26 @@ def predict_location(
     latitude,
     longitude
 ):
+    
+    # Actual current observation from nearest BOM station
+    bom_weather = find_nearest_station(
+        latitude,
+        longitude
+    )
 
+    # Weather data used for AI model features    
     weather = fetch_recent_weather(
         latitude,
         longitude
     )
 
     daily = weather["daily"]
+
+    current = weather["current"]
+
+    current_temp = current["temperature_2m"]
+    current_humidity = current["relative_humidity_2m"]
+    current_wind = current["wind_speed_10m"]
 
     rainfall = daily[
         "precipitation_sum"
@@ -305,14 +325,24 @@ def predict_location(
     ).unsqueeze(0).to(device)
 
     with torch.no_grad():
-
-        logits = model(
-            input_tensor
-        )
-
-        probability = torch.sigmoid(
-            logits
-        ).item()
+         # -----------------------------------
+         # CAPTURE REAL NEURAL ACTIVATIONS
+         # -----------------------------------
+         
+         layer1_raw = model.network[0](input_tensor)
+         layer1 = model.network[1](layer1_raw)
+         
+         layer2_raw = model.network[2](layer1)
+         layer2 = model.network[3](layer2_raw)
+         
+         layer3_raw = model.network[4](layer2)
+         layer3 = model.network[5](layer3_raw)
+         
+         logits = model.network[6](layer3)
+         
+         probability = torch.sigmoid(
+             logits
+         ).item()
 
     risk_score = (
         probability * 100
@@ -330,9 +360,27 @@ def predict_location(
     else:
         risk_level = "VERY HIGH"
 
+    activations = {
+        "input": input_tensor.squeeze(0).cpu().tolist(),
+        "layer1": layer1.squeeze(0).cpu().tolist(),
+        "layer2": layer2.squeeze(0).cpu().tolist(),
+        "layer3": layer3.squeeze(0).cpu().tolist(),
+        "output": probability,
+    }
+
     return {
+        "activations": activations,
         "latitude": latitude,
         "longitude": longitude,
+
+        "current_temp": bom_weather.get("temperature"),
+        "current_humidity": bom_weather.get("humidity"),
+        "current_wind": bom_weather.get("wind_speed"),
+        "weather_source": "Bureau of Meteorology",
+        "weather_station": bom_weather.get("station_name"),
+        "weather_station_distance_km": bom_weather.get("distance_km"),
+        "weather_observation_time": bom_weather.get("observation_time"),
+
         "max_temp": max_temp,
         "min_temp": min_temp,
         "avg_humidity":

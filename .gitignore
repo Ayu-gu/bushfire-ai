@@ -1,7 +1,21 @@
 .venv/
 __pycache__/
 .DS_Store
-data/
-models/node_modules/
-dist/
 .env
+
+# Generated datasets and geospatial data
+data/
+
+# Node / React generated files
+node_modules/
+dist/
+
+# Generated ML models
+models/*.pth
+models/*.pkl
+
+# Python cache
+*.pyc
+
+# Logs
+*.log
