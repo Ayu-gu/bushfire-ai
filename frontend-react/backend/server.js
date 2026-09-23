@@ -5,12 +5,13 @@ const path = require("node:path");
 
 const app = express();
 
-const PORT = 3000;
+const PORT = Number(process.env.PORT || 3015);
+const frontendPath = path.join(__dirname, "..", "dist");
 
 app.use(cors());
 app.use(express.json());
 
-app.get("/", (req, res) => {
+app.get("/health", (req, res) => {
   res.json({
     status: "Bushfire AI backend running",
   });
@@ -89,8 +90,14 @@ app.post("/predict", (req, res) => {
   });
 });
 
+app.use(express.static(frontendPath));
+
+app.get(/.*/, (req, res) => {
+  res.sendFile(path.join(frontendPath, "index.html"));
+});
+
 app.listen(PORT, () => {
   console.log(
-    `Bushfire AI backend running on http://localhost:${PORT}`
+    `Bushfire AI running on http://localhost:${PORT}`
   );
 });

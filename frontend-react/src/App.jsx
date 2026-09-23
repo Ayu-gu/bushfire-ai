@@ -77,7 +77,7 @@ function App() {
   
     try {
       const response = await fetch(
-        "http://localhost:3000/predict",
+        "/predict",
         {
           method: "POST",
           headers: {
