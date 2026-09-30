@@ -152,10 +152,10 @@ function App() {
               className="map"
             >
 
-              <TileLayer
-                attribution="&copy; OpenStreetMap contributors"
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              />
+<TileLayer
+  attribution='&copy; MapTiler &copy; OpenStreetMap contributors'
+  url={`https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key=${import.meta.env.VITE_MAPTILER_KEY}`}
+/>
 
               <LocationSelector
                 setLocation={setLocation}
