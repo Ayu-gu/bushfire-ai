@@ -1,4 +1,5 @@
 const DEV_MODE = false;
+import MapTilerMap from "./components/MapTilerMap";
 import { useState } from "react";
 import { useMap } from "react-leaflet";
 import {
@@ -6,6 +7,7 @@ import {
   TileLayer,
   Marker,
   useMapEvents,
+  LayersControl,
 } from "react-leaflet";
 
 import "leaflet/dist/leaflet.css";
@@ -61,6 +63,17 @@ function CurrentLocationButton({ setLocation }) {
     </button>
   );
 }
+
+function MapAttributionCleaner() {
+  const map = useMap();
+
+  if (map.attributionControl) {
+    map.attributionControl.setPrefix(false);
+  }
+
+  return null;
+}
+
 import L from "leaflet";
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
@@ -163,11 +176,32 @@ function App() {
               zoom={6}
               className="map"
             >
+           
 
-<TileLayer
-  attribution='&copy; MapTiler &copy; OpenStreetMap contributors'
-  url={`https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key=${import.meta.env.VITE_MAPTILER_KEY}`}
-/>
+<MapAttributionCleaner />
+
+<LayersControl position="bottomright">
+
+  <LayersControl.BaseLayer
+    checked
+    name="Streets"
+  >
+    <TileLayer
+      attribution='&copy; MapTiler &copy; OpenStreetMap contributors'
+      url={`https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key=${import.meta.env.VITE_MAPTILER_KEY}`}
+    />
+  </LayersControl.BaseLayer>
+
+  <LayersControl.BaseLayer
+    name="Satellite"
+  >
+    <TileLayer
+      attribution='&copy; MapTiler &copy; OpenStreetMap contributors'
+      url={`https://api.maptiler.com/maps/satellite/{z}/{x}/{y}.jpg?key=${import.meta.env.VITE_MAPTILER_KEY}`}
+    />
+  </LayersControl.BaseLayer>
+
+</LayersControl>
 
               <LocationSelector
                 setLocation={setLocation}
