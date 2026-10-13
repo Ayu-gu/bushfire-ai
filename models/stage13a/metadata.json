@@ -1,0 +1,39 @@
+{
+  "seed": 42,
+  "numeric_features": [
+    "month",
+    "day_of_year",
+    "season",
+    "max_temp",
+    "min_temp",
+    "avg_humidity",
+    "max_wind",
+    "rain_today",
+    "rain_last_7_days",
+    "rain_last_30_days",
+    "days_since_rain",
+    "temp_humidity_index",
+    "temp_wind_index",
+    "dryness_index",
+    "vpd",
+    "elevation"
+  ],
+  "categorical_features": [
+    "vegetation_class"
+  ],
+  "representation": "Stage 12G pair-masked vegetation",
+  "train_metrics": {
+    "accuracy": 0.9969874864823112,
+    "precision": 0.9972179289026275,
+    "recall": 0.9967557546732582,
+    "f1": 0.9969867882252955,
+    "roc_auc": 0.9997617884354335
+  },
+  "validation_metrics": {
+    "accuracy": 0.6250901225666907,
+    "precision": 0.6104392106938256,
+    "recall": 0.6914203316510454,
+    "f1": 0.6484110885733604,
+    "roc_auc": 0.6931643040302656
+  }
+}

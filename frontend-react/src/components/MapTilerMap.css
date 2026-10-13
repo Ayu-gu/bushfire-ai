@@ -1,0 +1,661 @@
+/* =========================================================
+   BUSHFIRE AI
+   CLEAN MAP INTERFACE
+   ========================================================= */
+
+   .risk-map {
+    position: relative;
+  
+    width: 100%;
+    height: 100%;
+    min-height: 500px;
+  
+    overflow: hidden;
+  
+    border-radius: 10px;
+  
+    background: #e9edef;
+  }
+  
+  
+  /* =========================================================
+     MAP CANVAS
+     ========================================================= */
+  
+  .risk-map__canvas {
+    position: absolute;
+    inset: 0;
+  }
+  
+  
+  /* =========================================================
+   COMPACT MAP TYPE SWITCHER
+   ========================================================= */
+
+.map-type-switcher {
+  position: absolute;
+
+  left: 12px;
+  bottom: 26px;
+
+  z-index: 10;
+
+  display: flex;
+  align-items: flex-end;
+
+  gap: 6px;
+
+  padding: 5px;
+
+  border: 1px solid rgba(20, 27, 34, 0.1);
+  border-radius: 10px;
+
+  background: rgba(255, 255, 255, 0.96);
+
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.1),
+    0 7px 20px rgba(0, 0, 0, 0.08);
+
+  backdrop-filter: blur(10px);
+
+  transition:
+    box-shadow 160ms ease;
+}
+
+
+/* =========================================================
+   MAP TYPE BUTTON
+   ========================================================= */
+
+.map-type {
+  display: flex;
+  flex-direction: column;
+
+  gap: 3px;
+
+  padding: 0;
+
+  border: 0;
+
+  background: transparent;
+
+  color: #303840;
+
+  font-family: inherit;
+
+  cursor: pointer;
+}
+
+
+/* =========================================================
+   SMALLER PREVIEW
+   ========================================================= */
+
+.map-type__preview {
+  position: relative;
+
+  width: 48px;
+  height: 38px;
+
+  display: block;
+
+  overflow: hidden;
+
+  border: 1px solid rgba(20, 27, 34, 0.15);
+  border-radius: 6px;
+
+  box-shadow:
+    inset 0 0 0 1px
+    rgba(255, 255, 255, 0.25);
+
+  transition:
+    transform 150ms ease,
+    border-color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+
+.map-type:hover .map-type__preview {
+  transform: translateY(-1px);
+
+  border-color: #20272e;
+
+  box-shadow:
+    0 2px 5px rgba(0, 0, 0, 0.14);
+}
+
+
+/* =========================================================
+   LABEL
+   ========================================================= */
+
+.map-type__label {
+  color: #3c444b;
+
+  font-size: 9px;
+  font-weight: 650;
+
+  line-height: 1;
+
+  text-align: center;
+}
+
+/* =========================================================
+   STREET PREVIEW
+   ========================================================= */
+
+.map-type__preview--streets {
+  background:
+    linear-gradient(
+      135deg,
+      #d9ead4 0%,
+      #d9ead4 34%,
+      #f2eee4 34%,
+      #f2eee4 100%
+    );
+}
+
+
+.street-preview__road {
+  position: absolute;
+
+  display: block;
+
+  height: 2px;
+
+  border-radius: 999px;
+
+  background: white;
+
+  box-shadow:
+    0 0 0 1px
+    rgba(208, 174, 95, 0.55);
+}
+
+
+.street-preview__road--one {
+  width: 55px;
+
+  top: 15px;
+  left: -5px;
+
+  transform: rotate(-28deg);
+}
+
+
+.street-preview__road--two {
+  width: 48px;
+
+  top: 22px;
+  left: 10px;
+
+  transform: rotate(34deg);
+}
+
+
+.street-preview__road--three {
+  width: 38px;
+
+  top: 10px;
+  left: 19px;
+
+  transform: rotate(78deg);
+}
+
+
+/* =========================================================
+   SATELLITE PREVIEW
+   ========================================================= */
+
+.map-type__preview--satellite {
+  background:
+    linear-gradient(
+      145deg,
+      #304b38 0%,
+      #526b3f 34%,
+      #887954 35%,
+      #6f6a43 57%,
+      #345a42 58%,
+      #233f31 100%
+    );
+}
+
+
+.satellite-preview__land {
+  position: absolute;
+
+  width: 30px;
+  height: 22px;
+
+  top: 8px;
+  left: 9px;
+
+  border-radius:
+    45% 55% 60% 40%;
+
+  background:
+    rgba(166, 157, 99, 0.5);
+
+  transform: rotate(-14deg);
+}
+  
+  
+  /* =========================================================
+     MAP TYPE BUTTON
+     ========================================================= */
+  
+  .map-type {
+    position: relative;
+  
+    display: flex;
+    flex-direction: column;
+  
+    gap: 5px;
+  
+    padding: 0;
+  
+    border: 0;
+  
+    background: transparent;
+  
+    color: #394149;
+  
+    font-family: inherit;
+  
+    cursor: pointer;
+  }
+  
+  
+  .map-type__preview {
+    position: relative;
+  
+    width: 66px;
+    height: 52px;
+  
+    display: block;
+  
+    overflow: hidden;
+  
+    border: 2px solid transparent;
+    border-radius: 8px;
+  
+    box-shadow:
+      inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+  
+    transition:
+      border-color 140ms ease,
+      transform 140ms ease,
+      box-shadow 140ms ease;
+  }
+  
+  
+  .map-type:hover .map-type__preview {
+    transform: translateY(-1px);
+  
+    box-shadow:
+      inset 0 0 0 1px rgba(0, 0, 0, 0.08),
+      0 3px 8px rgba(0, 0, 0, 0.12);
+  }
+  
+  
+  .map-type--active .map-type__preview {
+    border-color: #ffffff;
+  
+    box-shadow:
+      0 0 0 2px #20272e,
+      0 3px 8px rgba(0, 0, 0, 0.14);
+  }
+  
+  
+  /* =========================================================
+     STREET PREVIEW
+     ========================================================= */
+  
+  .map-type__preview--streets {
+    background:
+      linear-gradient(
+        135deg,
+        #d9ead4 0%,
+        #d9ead4 34%,
+        #f2eee4 34%,
+        #f2eee4 100%
+      );
+  }
+  
+  
+  .street-preview__road {
+    position: absolute;
+  
+    display: block;
+  
+    height: 3px;
+  
+    border-radius: 999px;
+  
+    background: #ffffff;
+  
+    box-shadow:
+      0 0 0 1px rgba(208, 174, 95, 0.55);
+  }
+  
+  
+  .street-preview__road--one {
+    width: 75px;
+  
+    top: 20px;
+    left: -5px;
+  
+    transform: rotate(-28deg);
+  }
+  
+  
+  .street-preview__road--two {
+    width: 65px;
+  
+    top: 29px;
+    left: 15px;
+  
+    transform: rotate(34deg);
+  }
+  
+  
+  .street-preview__road--three {
+    width: 48px;
+  
+    top: 12px;
+    left: 25px;
+  
+    transform: rotate(78deg);
+  }
+  
+  
+  /* =========================================================
+     SATELLITE PREVIEW
+     ========================================================= */
+  
+  .map-type__preview--satellite {
+    background:
+      linear-gradient(
+        145deg,
+        #304b38 0%,
+        #526b3f 34%,
+        #887954 35%,
+        #6f6a43 57%,
+        #345a42 58%,
+        #233f31 100%
+      );
+  }
+  
+  
+  .satellite-preview__land {
+    position: absolute;
+  
+    width: 38px;
+    height: 27px;
+  
+    top: 11px;
+    left: 13px;
+  
+    border-radius:
+      45% 55% 60% 40%;
+  
+    background:
+      rgba(166, 157, 99, 0.5);
+  
+    transform: rotate(-14deg);
+  }
+  
+  
+  /* =========================================================
+     MAP TYPE LABEL
+     ========================================================= */
+  
+  .map-type__label {
+    display: block;
+  
+    color: #4a5259;
+  
+    font-size: 10px;
+    font-weight: 600;
+  
+    line-height: 1;
+  
+    text-align: center;
+  }
+  
+  
+  .map-type--active .map-type__label {
+    color: #171c20;
+  
+    font-weight: 750;
+  }
+
+  /* =========================================================
+     MAPTILER NATIVE CONTROLS
+     ========================================================= */
+  
+  .risk-map .maplibregl-ctrl-top-right {
+    top: 10px;
+    right: 10px;
+  }
+  
+  
+  .risk-map .maplibregl-ctrl-group {
+    overflow: hidden;
+  
+    border: 1px solid rgba(20, 27, 34, 0.1);
+    border-radius: 8px;
+  
+    background: #ffffff;
+  
+    box-shadow:
+      0 1px 4px rgba(0, 0, 0, 0.12),
+      0 4px 12px rgba(0, 0, 0, 0.06);
+  }
+  
+  
+  .risk-map .maplibregl-ctrl-group button {
+    width: 38px;
+    height: 38px;
+  }
+  
+  
+  /* =========================================================
+     MAPTILER ATTRIBUTION
+     ========================================================= */
+  
+  .risk-map .maplibregl-ctrl-attrib {
+    font-size: 10px;
+  }
+  
+  
+  /* =========================================================
+     MOBILE
+     ========================================================= */
+  
+  @media (max-width: 700px) {
+  
+    .map-type-switcher {
+      left: 10px;
+      bottom: 25px;
+  
+      gap: 5px;
+  
+      padding: 6px;
+    }
+  
+  
+    .map-type__preview {
+      width: 55px;
+      height: 44px;
+    }
+  
+  
+    .map-location-control {
+      right: 10px;
+      bottom: 100px;
+    }
+  }
+  
+  
+  @media (max-width: 480px) {
+  
+    .map-type__preview {
+      width: 48px;
+      height: 40px;
+    }
+  
+  
+    .map-type__label {
+      font-size: 9px;
+    }
+  }
+
+  /* =========================================================
+   FULLSCREEN MAP
+   ========================================================= */
+
+.map-fullscreen-control {
+    position: absolute;
+  
+    top: 10px;
+    left: 10px;
+  
+    z-index: 20;
+  
+    width: 40px;
+    height: 40px;
+  
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  
+    padding: 0;
+  
+    border: 1px solid rgba(20, 27, 34, 0.12);
+    border-radius: 8px;
+  
+    background: rgba(255, 255, 255, 0.97);
+    color: #29323a;
+  
+    cursor: pointer;
+  
+    box-shadow:
+      0 1px 4px rgba(0, 0, 0, 0.12),
+      0 4px 12px rgba(0, 0, 0, 0.08);
+  
+    transition:
+      background 140ms ease,
+      transform 140ms ease,
+      box-shadow 140ms ease;
+  }
+  
+  .map-fullscreen-control:hover {
+    background: #ffffff;
+  
+    box-shadow:
+      0 2px 5px rgba(0, 0, 0, 0.15),
+      0 6px 16px rgba(0, 0, 0, 0.1);
+  }
+  
+  .map-fullscreen-control:active {
+    transform: scale(0.96);
+  }
+  
+  .map-fullscreen-control svg {
+    width: 20px;
+    height: 20px;
+  }
+  
+  
+  /* Browser fullscreen state */
+  
+  .risk-map:fullscreen {
+    width: 100%;
+    height: 100%;
+    min-height: 100%;
+  
+    border-radius: 0;
+  
+    background: #e9edef;
+  }
+  
+  
+  /* Give the actual map the entire fullscreen area */
+  
+  .risk-map:fullscreen .risk-map__canvas {
+    width: 100%;
+    height: 100%;
+  }
+  
+  
+  /* Slightly larger controls in fullscreen */
+  
+  .risk-map:fullscreen .map-fullscreen-control {
+    top: 16px;
+    left: 16px;
+  }
+  
+  .risk-map:fullscreen .map-type-switcher {
+    left: 16px;
+    bottom: 32px;
+  }
+  
+  .risk-map:fullscreen .map-location-control {
+    right: 16px;
+  }
+
+  /* =========================================================
+   THREE-WAY MAP TYPE SWITCHER
+   ========================================================= */
+
+.map-type-switcher {
+    display: flex;
+    align-items: flex-end;
+    gap: 6px;
+  }
+  
+  
+  /* Terrain thumbnail */
+  
+  .map-type__preview--terrain {
+    background:
+      linear-gradient(
+        180deg,
+        #d8e7d1 0%,
+        #b9d2ad 50%,
+        #8eaa7d 100%
+      );
+  }
+  
+  
+  .terrain-preview__mountain {
+    position: absolute;
+  
+    display: block;
+  
+    width: 38px;
+    height: 38px;
+  
+    transform: rotate(45deg);
+  
+    border-radius: 4px;
+  
+    background: #78946d;
+  }
+  
+  
+  .terrain-preview__mountain--back {
+    left: 25px;
+    top: 16px;
+  
+    background: #9ab38c;
+  }
+  
+  
+  .terrain-preview__mountain--front {
+    left: 5px;
+    top: 22px;
+  
+    background: #6f8c64;
+  }

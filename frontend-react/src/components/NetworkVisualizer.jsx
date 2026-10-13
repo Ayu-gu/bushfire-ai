@@ -221,7 +221,7 @@ function NetworkVisualizer({
 
         <div>
           <span>Output</span>
-          <strong>Sigmoid probability</strong>
+          <strong>Sigmoid model score</strong>
         </div>
 
       </div>

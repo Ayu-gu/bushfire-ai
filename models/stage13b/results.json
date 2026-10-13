@@ -1,0 +1,82 @@
+[
+  {
+    "name": "RF_A_current",
+    "max_depth": null,
+    "min_samples_leaf": 2,
+    "train_metrics": {
+      "accuracy": 0.9969874864823112,
+      "precision": 0.9972179289026275,
+      "recall": 0.9967557546732582,
+      "f1": 0.9969867882252955,
+      "roc_auc": 0.9997617884354335
+    },
+    "validation_metrics": {
+      "accuracy": 0.6250901225666907,
+      "precision": 0.6104392106938256,
+      "recall": 0.6914203316510454,
+      "f1": 0.6484110885733604,
+      "roc_auc": 0.6931643040302656
+    },
+    "auc_gap": 0.3065974844051679
+  },
+  {
+    "name": "RF_B_depth20_leaf5",
+    "max_depth": 20,
+    "min_samples_leaf": 5,
+    "train_metrics": {
+      "accuracy": 0.8259694114012051,
+      "precision": 0.7615270203272186,
+      "recall": 0.9491734898810443,
+      "f1": 0.8450587992572726,
+      "roc_auc": 0.937448760110119
+    },
+    "validation_metrics": {
+      "accuracy": 0.6272530641672674,
+      "precision": 0.5947396672034353,
+      "recall": 0.798846431146359,
+      "f1": 0.6818461538461539,
+      "roc_auc": 0.6917717251915381
+    },
+    "auc_gap": 0.24567703491858095
+  },
+  {
+    "name": "RF_C_depth15_leaf10",
+    "max_depth": 15,
+    "min_samples_leaf": 10,
+    "train_metrics": {
+      "accuracy": 0.7070137494206705,
+      "precision": 0.6457155284906481,
+      "recall": 0.9173489881044338,
+      "f1": 0.7579296700491416,
+      "roc_auc": 0.8348522254165416
+    },
+    "validation_metrics": {
+      "accuracy": 0.6171593366979091,
+      "precision": 0.5812906453226613,
+      "recall": 0.8377793799567411,
+      "f1": 0.6863555818074424,
+      "roc_auc": 0.6830019612541839
+    },
+    "auc_gap": 0.1518502641623577
+  },
+  {
+    "name": "RF_D_depth10_leaf15",
+    "max_depth": 10,
+    "min_samples_leaf": 15,
+    "train_metrics": {
+      "accuracy": 0.6497759925845821,
+      "precision": 0.5982369034349985,
+      "recall": 0.912096400432566,
+      "f1": 0.7225553787786073,
+      "roc_auc": 0.7542727543655474
+    },
+    "validation_metrics": {
+      "accuracy": 0.6031002162941601,
+      "precision": 0.5673892554194157,
+      "recall": 0.8680605623648161,
+      "f1": 0.6862353946993446,
+      "roc_auc": 0.6674044544849199
+    },
+    "auc_gap": 0.0868682998806275
+  }
+]

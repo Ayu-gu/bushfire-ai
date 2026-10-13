@@ -1,0 +1,18 @@
+[
+  "month",
+  "day_of_year",
+  "season",
+  "max_temp",
+  "min_temp",
+  "avg_humidity",
+  "max_wind",
+  "rain_today",
+  "rain_last_7_days",
+  "rain_last_30_days",
+  "days_since_rain",
+  "temp_humidity_index",
+  "temp_wind_index",
+  "dryness_index",
+  "vpd",
+  "elevation"
+]

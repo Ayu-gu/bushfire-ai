@@ -1,0 +1,24 @@
+{
+  "model": "Temporal LSTM + static fusion",
+  "sequence": "31 days x 5 weather features",
+  "vegetation_used": false,
+  "reason_vegetation_excluded": "Avoid known mapping-availability shortcut",
+  "parameters": 58177,
+  "best_epoch": 55,
+  "best_val_loss": 0.6461118459701538,
+  "train_metrics": {
+    "accuracy": 0.630851228178588,
+    "precision": 0.6108638743455498,
+    "recall": 0.7209949019002009,
+    "f1": 0.6613760362786084,
+    "roc_auc": 0.6866173645180377
+  },
+  "validation_metrics": {
+    "accuracy": 0.6110310021629416,
+    "precision": 0.5947109471094711,
+    "recall": 0.6971881759192502,
+    "f1": 0.641885164288085,
+    "roc_auc": 0.6515849875946644
+  },
+  "test_used": false
+}

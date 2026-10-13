@@ -1,94 +1,29 @@
-const DEV_MODE = false;
-import MapTilerMap from "./components/MapTilerMap";
 import { useState } from "react";
-import { useMap } from "react-leaflet";
 import {
-  MapContainer,
-  TileLayer,
-  Marker,
-  useMapEvents,
-  LayersControl,
-} from "react-leaflet";
+  LayoutDashboard,
+  Map,
+  MapPin,
+  BrainCircuit,
+  TriangleAlert,
+  Newspaper,
+  History,
+  Bookmark,
+  Settings,
+  Info,
+} from "lucide-react";
 
-import "leaflet/dist/leaflet.css";
+import Header from "./components/Header";
+import MapTilerMap from "./components/MapTilerMap";
+import NetworkVisualizer from "./components/NetworkVisualizer";
+import AIPrediction from "./pages/AIPrediction";
+import FireWarnings from "./pages/FireWarnings";
+
 import "./App.css";
-import NetworkVisualizer
-  from "./components/NetworkVisualizer";
 
-
-function LocationSelector({ setLocation }) {
-
-  useMapEvents({
-    click(event) {
-      setLocation({
-        lat: event.latlng.lat,
-        lng: event.latlng.lng,
-      });
-    },
-  });
-
-  return null;
-}
-function CurrentLocationButton({ setLocation }) {
-  const map = useMap();
-
-  const useCurrentLocation = () => {
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const newLocation = {
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-        };
-
-        setLocation(newLocation);
-
-        map.setView(
-          [newLocation.lat, newLocation.lng],
-          11
-        );
-      },
-      () => {
-        alert("Unable to get your current location.");
-      }
-    );
-  };
-
-  return (
-    <button
-      className="location-button"
-      onClick={useCurrentLocation}
-      type="button"
-    >
-      Use My Location
-    </button>
-  );
-}
-
-function MapAttributionCleaner() {
-  const map = useMap();
-
-  if (map.attributionControl) {
-    map.attributionControl.setPrefix(false);
-  }
-
-  return null;
-}
-
-import L from "leaflet";
-import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
-import markerIcon from "leaflet/dist/images/marker-icon.png";
-import markerShadow from "leaflet/dist/images/marker-shadow.png";
-
-delete L.Icon.Default.prototype._getIconUrl;
-
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: markerIcon2x,
-  iconUrl: markerIcon,
-  shadowUrl: markerShadow,
-});
+const DEV_MODE = false;
 
 function App() {
-
+  const [activePage, setActivePage] = useState("Dashboard");
   const [location, setLocation] = useState(null);
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -96,31 +31,27 @@ function App() {
 
   const analyseRisk = async () => {
     if (!location) return;
-  
+
     setLoading(true);
     setError("");
-  
+
     try {
-      const response = await fetch(
-        "/predict",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            latitude: location.lat,
-            longitude: location.lng,
-          }),
-        }
-      );
-  
+      const response = await fetch("/predict", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          latitude: location.lat,
+          longitude: location.lng,
+        }),
+      });
+
       if (!response.ok) {
         throw new Error("Prediction request failed");
       }
-  
+
       const data = await response.json();
-  
       setResult(data);
     } catch (err) {
       console.error(err);
@@ -130,205 +61,341 @@ function App() {
     }
   };
 
+  const navigation = [
+    {
+      label: "Dashboard",
+      icon: LayoutDashboard,
+    },
+    {
+      label: "Risk Map",
+      icon: Map,
+    },
+    {
+      label: "AI Prediction",
+      icon: BrainCircuit,
+    },
+    {
+      label: "Fire Warnings",
+      icon: TriangleAlert,
+    },
+    {
+      label: "Climate News",
+      icon: Newspaper,
+    },
+    {
+      label: "History",
+      icon: History,
+    },
+  ];
+
+  const secondaryNavigation = [
+    {
+      label: "Saved Locations",
+      icon: Bookmark,
+    },
+    {
+      label: "Settings",
+      icon: Settings,
+    },
+    {
+      label: "About",
+      icon: Info,
+    },
+  ];
+
   return (
     <div className="app">
+      <Header setLocation={setLocation} />
 
-      <aside className="sidebar">
+      <div className="app-body">
+        <aside className="sidebar">
+          <nav
+            className="sidebar-nav"
+            aria-label="Main navigation"
+          >
+            <div className="sidebar-section">
+              <span className="sidebar-section-label">
+                Intelligence
+              </span>
 
-        <h1>Bushfire AI</h1>
-        <p>AI-powered bushfire risk prediction</p>
+              {navigation.map((item) => {
+                const Icon = item.icon;
 
-        <nav>
-          <button className="active">
-            Dashboard
-          </button>
+                return (
+                  <button
+                    key={item.label}
+                    className={`sidebar-item ${
+                      activePage === item.label ? "active" : ""
+                    }`}
+                    onClick={() => setActivePage(item.label)}
+                    type="button"
+                  >
 
-          <button>Risk Prediction</button>
-          <button>Image Detection</button>
-          <button>History</button>
-        </nav>
+                    <Icon
+                      className="sidebar-icon"
+                      size={18}
+                      strokeWidth={1.8}
+                    />
 
-      </aside>
-
-
-      <main className="main">
-
-        <header>
-          <h2>Bushfire Risk Dashboard</h2>
-
-          <p>
-            Select a location to analyse
-            bushfire risk using our AI model.
-          </p>
-        </header>
-
-
-        <div className="dashboard">
-
-          <section className="map-card">
-
-            <div className="card-title">
-              <h3>Interactive Risk Map</h3>
+                    <span>{item.label}</span>
+                  </button>
+                );
+              })}
             </div>
 
-            <MapContainer
-              center={[-33.5, 147]}
-              zoom={6}
-              className="map"
-            >
-           
+            <div className="sidebar-divider" />
 
-<MapAttributionCleaner />
+            <div className="sidebar-section">
+              <span className="sidebar-section-label">
+                Workspace
+              </span>
 
-<LayersControl position="bottomright">
+              {secondaryNavigation.map((item) => {
+                const Icon = item.icon;
 
-  <LayersControl.BaseLayer
-    checked
-    name="Streets"
-  >
-    <TileLayer
-      attribution='&copy; MapTiler &copy; OpenStreetMap contributors'
-      url={`https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key=${import.meta.env.VITE_MAPTILER_KEY}`}
-    />
-  </LayersControl.BaseLayer>
+                return (
+                  <button
+                     key={item.label}
+                     className={`sidebar-item ${
+                      activePage === item.label ? "active" : ""
+                     }`}
+                     onClick={() => setActivePage(item.label)}
+                     type="button"
+                     
+                  >
 
-  <LayersControl.BaseLayer
-    name="Satellite"
-  >
-    <TileLayer
-      attribution='&copy; MapTiler &copy; OpenStreetMap contributors'
-      url={`https://api.maptiler.com/maps/satellite/{z}/{x}/{y}.jpg?key=${import.meta.env.VITE_MAPTILER_KEY}`}
-    />
-  </LayersControl.BaseLayer>
+                    <Icon
+                      className="sidebar-icon"
+                      size={18}
+                      strokeWidth={1.8}
+                    />
 
-</LayersControl>
-
-              <LocationSelector
-                setLocation={setLocation}
-              />
-              <CurrentLocationButton
-                setLocation={setLocation}
-              />
-
-              {location && (
-                <Marker
-                  position={[
-                    location.lat,
-                    location.lng,
-                  ]}
-                />
-              )}
-
-            </MapContainer>
-
-          </section>
-          {DEV_MODE && (
-            <NetworkVisualizer
-            activations={result?.activations}
-            riskScore={result?.risk_score}
-            riskLevel={result?.risk_level}
-            />
-          )}
-
-
-          <section className="risk-card">
-
-            <h3>Selected Location</h3>
-
-            <div className="location-box">
-
-              {location ? (
-                <>
-                  <p>
-                    Latitude:{" "}
-                    {location.lat.toFixed(4)}
-                  </p>
-
-                  <p>
-                    Longitude:{" "}
-                    {location.lng.toFixed(4)}
-                  </p>
-                </>
-              ) : (
-                <p>Click anywhere on the map</p>
-              )}
-
+                    <span>{item.label}</span>
+                  </button>
+                );
+              })}
             </div>
+          </nav>
 
+          <div className="sidebar-footer">
+            <span className="sidebar-system-dot" />
 
-            <div className="risk-result">
-              <span>Predicted Risk</span>
-              
-              <strong>
-                {result ? result.risk_level : "--"}
-              </strong>
-              
+            <div>
+              <strong>System operational</strong>
+              <span>Bushfire intelligence platform</span>
+            </div>
+          </div>
+        </aside>
+
+        <main className="main">
+        {activePage === "Fire Warnings" ? (
+          <FireWarnings />
+        ) : activePage === "AI Prediction" ? (
+          <AIPrediction
+          location={location}
+          result={result}
+          loading={loading}
+          error={error}
+          onAnalyse={analyseRisk}
+          />
+        ) : (
+          <>
+          <header className="dashboard-header">
+            <div>
+              <span className="dashboard-eyebrow">
+                Bushfire Intelligence
+              </span>
+
+              <h1>Bushfire Risk Dashboard</h1>
+
               <p>
-                {result
-                  ? `${result.risk_score}% risk score`
-                  : "Select a location and run analysis"}
+                Explore locations and assess bushfire risk
+                using environmental data and AI analysis.
               </p>
             </div>
+          </header>
 
+          <div className="dashboard">
+            <section className="map-card">
+              <MapTilerMap
+                location={location}
+                setLocation={setLocation}
+              />
+            </section>
 
-            <h3>Environmental Conditions</h3>
-
-            <div className="conditions">
-
-              <div>
-                <span>Temperature</span>
-                <strong>
-                  {result ? `${result.current_temp}°C` : "--"}
-                </strong>
-              </div>
-
-              <div>
-                <span>Humidity</span>
-                <strong>
-                  {result ? `${result.current_humidity}%` : "--"}
-                </strong>
-              </div>
-
-              <div>
-                <span>Wind</span>
-                <strong>
-                  {result ? `${result.current_wind} km/h` : "--"}
-                </strong>
-              </div>
-
-              <div>
-                <span>Rainfall 30d</span>
-                <strong>
-                  {result ? `${result.rain_last_30_days} mm` : "--"}
-                </strong>
-              </div>
-
-            </div>
-
-
-            <button
-              className="analyse"
-              disabled={!location || loading}
-              onClick={analyseRisk}
-            >
-              {loading
-                ? "Analysing..."
-                : "Analyse Bushfire Risk"}
-            </button>
-
-            {error && (
-              <p className="error-message">
-                {error}
-              </p>
+            {DEV_MODE && (
+              <NetworkVisualizer
+                activations={result?.activations}
+                riskScore={result?.risk_score}
+                riskLevel={result?.risk_level}
+              />
             )}
 
-          </section>
+            <section className="risk-card">
+              <div className="risk-card-header">
+                <div>
+                  <span className="panel-eyebrow">
+                    Location Intelligence
+                  </span>
 
+                  <h2>Selected Location</h2>
+                </div>
+              </div>
 
+              <div className="location-box">
+  {location ? (
+    <>
+      {location.name && (
+        <div className="selected-place">
+          <MapPin
+            size={17}
+            strokeWidth={1.8}
+          />
+
+          <div>
+            <strong>{location.name}</strong>
+
+            <span>
+              Selected location
+            </span>
+          </div>
+        </div>
+      )}
+
+      <div className="coordinates">
+        <div>
+          <span>Latitude</span>
+          <strong>
+            {location.lat.toFixed(4)}
+          </strong>
         </div>
 
-      </main>
+        <div>
+          <span>Longitude</span>
+          <strong>
+            {location.lng.toFixed(4)}
+          </strong>
+        </div>
+      </div>
+    </>
+  ) : (
+                  <div className="empty-location">
+                    <Map
+                      size={18}
+                      strokeWidth={1.8}
+                    />
 
+                    <span>
+                      Select a point on the map to begin
+                      analysis.
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              <div className="risk-result">
+                <div className="risk-result-heading">
+                  <span>Predicted Risk</span>
+
+                  {result && (
+                    <span className="risk-status">
+                      AI assessment
+                    </span>
+                  )}
+                </div>
+
+                <strong className="risk-level">
+                  {result
+                    ? result.risk_level
+                    : "--"}
+                </strong>
+
+                <p>
+                  {result
+                    ? `${result.risk_score}% predicted risk score`
+                    : "Run an analysis to calculate the current bushfire risk."}
+                </p>
+              </div>
+
+              <div className="conditions-header">
+                <span className="panel-eyebrow">
+                  Current Inputs
+                </span>
+
+                <h2>Environmental Conditions</h2>
+              </div>
+
+              <div className="conditions">
+                <div className="condition-item">
+                  <span>Temperature</span>
+
+                  <strong>
+                    {result
+                      ? `${result.current_temp}°C`
+                      : "--"}
+                  </strong>
+                </div>
+
+                <div className="condition-item">
+                  <span>Humidity</span>
+
+                  <strong>
+                    {result
+                      ? `${result.current_humidity}%`
+                      : "--"}
+                  </strong>
+                </div>
+
+                <div className="condition-item">
+                  <span>Wind</span>
+
+                  <strong>
+                    {result
+                      ? `${result.current_wind} km/h`
+                      : "--"}
+                  </strong>
+                </div>
+
+                <div className="condition-item">
+                  <span>Rainfall · 30d</span>
+
+                  <strong>
+                    {result
+                      ? `${result.rain_last_30_days} mm`
+                      : "--"}
+                  </strong>
+                </div>
+              </div>
+
+              <button
+                className="analyse"
+                disabled={!location || loading}
+                onClick={analyseRisk}
+                type="button"
+              >
+                <BrainCircuit
+                  size={18}
+                  strokeWidth={1.9}
+                />
+
+                <span>
+                  {loading
+                    ? "Analysing..."
+                    : "Analyse Bushfire Risk"}
+                </span>
+              </button>
+
+              {error && (
+                <p className="error-message">
+                  {error}
+                </p>
+              )}
+            </section>
+          </div>
+        </>
+        )}
+        </main>
+      </div>
     </div>
   );
 }

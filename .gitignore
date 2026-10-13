@@ -19,3 +19,7 @@ models/*.pkl
 
 # Logs
 *.log
+# Large experimental Random Forest models
+models/stage13a/*.pkl
+models/stage13b/*.pkl
+frontend-react/src/components/FireIncidentMap.backup.jsx

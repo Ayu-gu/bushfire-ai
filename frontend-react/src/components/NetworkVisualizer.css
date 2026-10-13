@@ -209,7 +209,7 @@
   
     animation:
       signalFlow
-      1.1s linear infinite;
+      3.5s ease-in-out infinite;
   }
   
   
@@ -331,3 +331,90 @@
       flex: 0 0 44px;
     }
   }
+/* Compact neural network visualization */
+
+.network-panel {
+  padding: 18px 20px;
+}
+
+.network-header {
+  margin-bottom: 12px;
+}
+
+.network-header h3 {
+  font-size: 16px;
+}
+
+.network-header p {
+  font-size: 11px;
+}
+
+.network-flow {
+  min-height: 205px;
+  gap: 6px;
+}
+
+.network-layer {
+  width: 105px;
+}
+
+.layer-label {
+  margin-bottom: 9px;
+  font-size: 11px;
+}
+
+.neurons {
+  min-height: 155px;
+  gap: 5px;
+}
+
+.neuron {
+  width: 13px;
+  height: 13px;
+}
+
+.output-neuron {
+  width: 34px;
+  height: 34px;
+}
+
+.layer-count {
+  margin-top: 7px;
+  font-size: 9px;
+}
+
+.flow-arrow {
+  width: 34px;
+}
+
+.flow-arrow span {
+  font-size: 22px;
+}
+
+.network-explanation {
+  margin-top: 12px;
+  gap: 9px;
+}
+
+.network-explanation div {
+  padding: 9px 11px;
+}
+
+.network-explanation span {
+  font-size: 9px;
+}
+
+.network-explanation strong {
+  font-size: 11px;
+}
+
+@media (max-width: 1100px) {
+  .network-layer {
+    flex: 0 0 105px;
+  }
+
+  .flow-arrow {
+    flex: 0 0 34px;
+  }
+}
+
