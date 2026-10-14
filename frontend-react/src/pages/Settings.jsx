@@ -13,7 +13,11 @@ import {
   LockKeyhole,
   LogOut,
 } from "lucide-react";
-import { onAuthStateChanged, signOut } from "firebase/auth";
+import {
+  onAuthStateChanged,
+  sendEmailVerification,
+  signOut,
+} from "firebase/auth";
 
 import { auth } from "../firebase";
 import "./Settings.css";
@@ -23,6 +27,45 @@ export default function Settings({ onNavigate }) {
   const [authReady, setAuthReady] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
   const [accountError, setAccountError] = useState("");
+  const [verificationLoading, setVerificationLoading] = useState(false);
+  const [verificationMessage, setVerificationMessage] = useState("");
+
+  const providers =
+    user?.providerData?.map((provider) => provider.providerId) || [];
+
+  const hasGoogle = providers.includes("google.com");
+  const hasPassword = providers.includes("password");
+
+  const accountType =
+    hasGoogle && hasPassword
+      ? "Google & Email Account"
+      : hasGoogle
+        ? "Google Account"
+        : hasPassword
+          ? "Email & Password Account"
+          : "Firebase Account";
+
+  const handleVerificationEmail = async () => {
+    if (!user || verificationLoading) return;
+
+    setVerificationLoading(true);
+    setVerificationMessage("");
+
+    try {
+      await sendEmailVerification(user);
+      setVerificationMessage(
+        "Verification email sent. Please check your inbox."
+      );
+    } catch (error) {
+      console.error("Verification email failed:", error.code);
+      setVerificationMessage(
+        "Unable to send verification email. Please try again later."
+      );
+    } finally {
+      setVerificationLoading(false);
+    }
+  };
+
 
   const handleSignOut = async () => {
     if (signingOut) return;
@@ -102,7 +145,7 @@ export default function Settings({ onNavigate }) {
               {user.photoURL ? (
                 <img
                   src={user.photoURL}
-                  alt="Google profile"
+                  alt="Account profile"
                   referrerPolicy="no-referrer"
                 />
               ) : (
@@ -116,7 +159,7 @@ export default function Settings({ onNavigate }) {
                   {user.displayName || "Bushfire AI User"}
                 </strong>
 
-                <span>Google Account</span>
+                <span>{accountType}</span>
               </div>
 
               <span className="settings-connected">
@@ -143,12 +186,43 @@ export default function Settings({ onNavigate }) {
 
                 <strong>Authenticated</strong>
               </div>
+
+              {hasPassword && (
+                <div>
+                  <Mail size={16} />
+                  <span>Email Verification</span>
+                  <strong>
+                    {user.emailVerified ? "Verified" : "Not Verified"}
+                  </strong>
+                </div>
+              )}
             </div>
 
             <p className="settings-account-note">
               Your prediction history and saved locations
-              are associated with this Google account.
+              are associated with your Bushfire AI account.
             </p>
+
+            {hasPassword && !user.emailVerified && (
+              <div style={{ marginTop: "16px" }}>
+                <button
+                  type="button"
+                  className="auth-text-button"
+                  onClick={handleVerificationEmail}
+                  disabled={verificationLoading}
+                >
+                  {verificationLoading
+                    ? "Sending verification..."
+                    : "Resend Verification Email"}
+                </button>
+
+                {verificationMessage && (
+                  <p role="status" style={{ marginTop: "10px" }}>
+                    {verificationMessage}
+                  </p>
+                )}
+              </div>
+            )}
           </div>
         ) : (
           <div className="settings-guest">
@@ -157,7 +231,7 @@ export default function Settings({ onNavigate }) {
             <h3>You're browsing as a guest</h3>
 
             <p>
-              Sign in with Google to access your
+              Sign in with Google or email to access your
               personal history and saved locations
               across devices.
             </p>
