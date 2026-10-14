@@ -2,15 +2,60 @@ import { useEffect, useRef, useState } from "react";
 import {
   Bell,
   ChevronDown,
+  LogOut,
   LoaderCircle,
   MapPin,
   Search,
+  UserRound,
 } from "lucide-react";
 import * as maptilersdk from "@maptiler/sdk";
 
+import { onAuthStateChanged, signOut } from "firebase/auth";
+import { auth } from "../firebase";
 import "./Header.css";
+import AuthModal from "./AuthModal";
 
 function Header({ setLocation }) {
+  const [authOpen, setAuthOpen] = useState(false);
+  const [user, setUser] = useState(null);
+  const [authReady, setAuthReady] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const profileWrapper = useRef(null);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      setAuthReady(true);
+    });
+
+    return unsubscribe;
+  }, []);
+
+  useEffect(() => {
+    const handleOutsideClick = (event) => {
+      if (
+        profileWrapper.current &&
+        !profileWrapper.current.contains(event.target)
+      ) {
+        setProfileOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleOutsideClick);
+
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+    };
+  }, []);
+
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth);
+      setProfileOpen(false);
+    } catch (error) {
+      console.error("Sign out failed:", error);
+    }
+  };
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
   const [loadingSearch, setLoadingSearch] = useState(false);
@@ -245,27 +290,93 @@ function Header({ setLocation }) {
 
         <div className="header-divider" />
 
-        <button
-          className="profile-button"
-          type="button"
-          aria-label="Open user menu"
-        >
-          <span className="profile-avatar">
-            AG
-          </span>
+        {!authReady ? (
+          <span className="header-auth-loading">Loading...</span>
+        ) : user ? (
+          <div className="profile-wrapper" ref={profileWrapper}>
+            <button
+              className="profile-button"
+              type="button"
+              aria-label="Open account menu"
+              aria-expanded={profileOpen}
+              onClick={() => setProfileOpen((open) => !open)}
+            >
+              {user.photoURL ? (
+                <img
+                  className="profile-avatar profile-photo"
+                  src={user.photoURL}
+                  alt=""
+                  referrerPolicy="no-referrer"
+                />
+              ) : (
+                <span className="profile-avatar">
+                  {(user.displayName || user.email || "U")
+                    .slice(0, 2)
+                    .toUpperCase()}
+                </span>
+              )}
 
-          <span className="profile-details">
-            <strong>Ayub</strong>
-            <span>Operator</span>
-          </span>
+              <span className="profile-details">
+                <strong>
+                  {user.displayName?.split(" ")[0] || "My Account"}
+                </strong>
+                <span>Signed In</span>
+              </span>
 
-          <ChevronDown
-            className="profile-chevron"
-            size={15}
-            strokeWidth={1.8}
-          />
-        </button>
+              <ChevronDown
+                className="profile-chevron"
+                size={15}
+                strokeWidth={1.8}
+              />
+            </button>
+
+            {profileOpen && (
+              <div className="profile-dropdown">
+                <div className="profile-dropdown-user">
+                  <strong>
+                    {user.displayName || "Bushfire AI User"}
+                  </strong>
+                  <span>{user.email}</span>
+                </div>
+
+                <div className="profile-dropdown-divider" />
+
+                <button
+                  type="button"
+                  onClick={() => setProfileOpen(false)}
+                >
+                  <UserRound size={16} />
+                  My Account
+                </button>
+
+                <div className="profile-dropdown-divider" />
+
+                <button
+                  className="profile-signout"
+                  type="button"
+                  onClick={handleSignOut}
+                >
+                  <LogOut size={16} />
+                  Sign Out
+                </button>
+              </div>
+            )}
+          </div>
+        ) : (
+          <button
+            className="header-signin-button"
+            type="button"
+            aria-label="Sign in to Bushfire AI"
+            onClick={() => setAuthOpen(true)}
+          >
+            Sign In
+          </button>
+        )}
       </div>
+      <AuthModal
+        isOpen={authOpen}
+        onClose={() => setAuthOpen(false)}
+      />
     </header>
   );
 }

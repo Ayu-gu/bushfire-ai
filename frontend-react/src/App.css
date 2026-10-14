@@ -583,3 +583,21 @@ button {
 
   font-size: 9px;
 }
+.main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 0;
+}
+
+.main-content {
+  flex: 1;
+  min-width: 0;
+  padding: 36px;
+}
+
+@media (max-width: 650px) {
+  .main-content {
+    padding: 20px;
+  }
+}

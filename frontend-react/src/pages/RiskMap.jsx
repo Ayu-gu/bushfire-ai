@@ -1,4 +1,13 @@
-import { BrainCircuit, MapPin, ShieldAlert, Compass } from "lucide-react";
+import { useEffect, useState } from "react";
+import { BrainCircuit, MapPin, ShieldAlert, Compass, Bookmark } from "lucide-react";
+import {
+  addDoc,
+  collection,
+  getDocs,
+  onSnapshot,
+  serverTimestamp,
+} from "firebase/firestore";
+import { auth, db } from "../firebase";
 import MapTilerMap from "../components/MapTilerMap";
 import "./RiskMap.css";
 
@@ -14,6 +23,124 @@ export default function RiskMap({
   onRemoveAnalysis,
   onClearAnalyses,
 }) {
+  const [saving, setSaving] = useState(false);
+  const [saveMessage, setSaveMessage] = useState("");
+  const [savedLocations, setSavedLocations] = useState([]);
+  const [bookmarksReady, setBookmarksReady] = useState(false);
+
+  useEffect(() => {
+    let unsubscribeBookmarks = () => {};
+
+    const unsubscribeAuth = auth.onAuthStateChanged((user) => {
+      unsubscribeBookmarks();
+      setSavedLocations([]);
+      setBookmarksReady(false);
+
+      if (!user) {
+        setBookmarksReady(true);
+        return;
+      }
+
+      unsubscribeBookmarks = onSnapshot(
+        collection(db, "users", user.uid, "savedLocations"),
+        (snapshot) => {
+          setSavedLocations(snapshot.docs.map((item) => item.data()));
+          setBookmarksReady(true);
+        },
+        (error) => {
+          console.error("Unable to check bookmarks:", error);
+          setBookmarksReady(false);
+        }
+      );
+    });
+
+    return () => {
+      unsubscribeAuth();
+      unsubscribeBookmarks();
+    };
+  }, []);
+
+  useEffect(() => {
+    setSaveMessage("");
+  }, [location?.lat, location?.lng]);
+
+  const alreadyBookmarked = Boolean(
+    location &&
+    savedLocations.some(
+      (saved) =>
+        Number(saved.lat).toFixed(5) ===
+          Number(location.lat).toFixed(5) &&
+        Number(saved.lng).toFixed(5) ===
+          Number(location.lng).toFixed(5)
+    )
+  );
+
+  const saveLocation = async () => {
+    if (!location || saving || alreadyBookmarked || !bookmarksReady) return;
+
+    const user = auth.currentUser;
+
+    if (!user) {
+      setSaveMessage("Please sign in to save locations.");
+      return;
+    }
+
+    const customName = window.prompt(
+      "Give this location a name (optional):",
+      ""
+    );
+
+    if (customName === null) return;
+
+    setSaving(true);
+    setSaveMessage("");
+
+    try {
+      const savedCollection = collection(
+        db,
+        "users",
+        user.uid,
+        "savedLocations"
+      );
+
+      const existingLocations = await getDocs(savedCollection);
+
+      const alreadySaved = existingLocations.docs.some((item) => {
+        const saved = item.data();
+
+        return (
+          Number(saved.lat).toFixed(5) ===
+            Number(location.lat).toFixed(5) &&
+          Number(saved.lng).toFixed(5) ===
+            Number(location.lng).toFixed(5)
+        );
+      });
+
+      if (alreadySaved) {
+        setSaveMessage("This location is already saved.");
+        return;
+      }
+
+      await addDoc(
+        collection(db, "users", user.uid, "savedLocations"),
+        {
+          name: location.name || "Selected location",
+          customName: customName.trim(),
+          lat: location.lat,
+          lng: location.lng,
+          createdAt: serverTimestamp(),
+        }
+      );
+
+      setSaveMessage("Location saved successfully.");
+    } catch (error) {
+      console.error("Unable to save location:", error);
+      setSaveMessage("Unable to save location. Please try again.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const score = result?.risk_score;
   const level = result?.risk_level || "Not analysed";
 
@@ -112,6 +239,35 @@ export default function RiskMap({
             ) : (
               <p className="risk-explorer-empty">
                 Click anywhere on the map or search for a location.
+              </p>
+            )}
+
+            <button
+              className={`risk-save-location ${
+                alreadyBookmarked ? "is-saved" : ""
+              }`}
+              type="button"
+              onClick={saveLocation}
+              disabled={
+                !location ||
+                saving ||
+                alreadyBookmarked ||
+                !bookmarksReady
+              }
+            >
+              <Bookmark size={17} />
+              {saving
+                ? "Saving..."
+                : alreadyBookmarked
+                  ? "Already Saved"
+                  : !bookmarksReady
+                    ? "Checking Saved Locations..."
+                    : "Save Location"}
+            </button>
+
+            {saveMessage && (
+              <p className="risk-save-message" role="status">
+                {saveMessage}
               </p>
             )}
 

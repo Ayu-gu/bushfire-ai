@@ -23,3 +23,15 @@ models/*.pkl
 models/stage13a/*.pkl
 models/stage13b/*.pkl
 frontend-react/src/components/FireIncidentMap.backup.jsx
+
+# Private environment configuration
+.env.*
+!.env.example
+!.env.*.example
+
+# Private service credentials
+*serviceAccount*.json
+*service-account*.json
+*credentials*.json
+*.pem
+*.key

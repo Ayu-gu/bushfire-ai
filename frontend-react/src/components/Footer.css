@@ -1,0 +1,120 @@
+.platform-footer {
+  width: 100%;
+  margin-top: auto;
+  border-top: 1px solid #e1e7ec;
+  background: #fff;
+}
+
+.platform-footer-content {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 42px;
+  padding: 45px 38px;
+}
+
+.platform-footer-logo {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: #263441;
+}
+
+.platform-footer-logo svg {
+  color: #e65c35;
+}
+
+.platform-footer-logo strong {
+  font-size: 17px;
+  letter-spacing: -0.03em;
+}
+
+.platform-footer-brand p {
+  max-width: 300px;
+  margin: 16px 0;
+  color: #7d8c9a;
+  font-size: 12px;
+  line-height: 1.9;
+}
+
+.platform-footer-project {
+  color: #9aa7b3;
+  font-size: 11px;
+}
+
+.platform-footer-column {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.platform-footer-column h3 {
+  margin: 2px 0 6px;
+  color: #263441;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.platform-footer-column button,
+.platform-footer-column a {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #798998;
+  font-family: inherit;
+  font-size: 12px;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.platform-footer-column button:hover,
+.platform-footer-column a:hover {
+  color: #16824d;
+}
+
+.platform-footer-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+  padding: 20px 38px;
+  border-top: 1px solid #e8edf0;
+  background: #f8fafb;
+  color: #8998a6;
+  font-size: 11px;
+}
+
+.platform-footer-divider {
+  margin: 0 9px;
+}
+
+.platform-footer-disclaimer {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #9a7953;
+}
+
+@media (max-width: 1000px) {
+  .platform-footer-content {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 30px;
+  }
+}
+
+@media (max-width: 600px) {
+  .platform-footer-content {
+    grid-template-columns: 1fr;
+    padding: 30px 22px;
+  }
+
+  .platform-footer-bottom {
+    padding: 20px 22px;
+  }
+}

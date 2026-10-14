@@ -1,5 +1,11 @@
 import ClimateNews from "./pages/ClimateNews";
 import RiskMap from "./pages/RiskMap";
+import PredictionHistory from "./pages/History";
+import SettingsPage from "./pages/Settings";
+
+import AboutPage from "./pages/About";
+import Contact from "./pages/Contact";
+import SavedLocations from "./pages/SavedLocations";
 import { useCallback, useRef, useState } from "react";
 import {
   LayoutDashboard,
@@ -12,13 +18,18 @@ import {
   Bookmark,
   Settings,
   Info,
+  Mail,
 } from "lucide-react";
 
 import Header from "./components/Header";
+import Footer from "./components/Footer";
 import MapTilerMap from "./components/MapTilerMap";
 import NetworkVisualizer from "./components/NetworkVisualizer";
 import AIPrediction from "./pages/AIPrediction";
 import FireWarnings from "./pages/FireWarnings";
+
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { auth, db } from "./firebase";
 
 import "./App.css";
 
@@ -77,6 +88,38 @@ function App() {
       if (requestId !== predictionRequestId.current) return;
 
       setResult(data);
+
+      const predictionUser = auth.currentUser;
+
+      if (predictionUser) {
+        const historyRecord = {
+          name: location.name || "Selected location",
+          lat: selectedLocation.latitude,
+          lng: selectedLocation.longitude,
+          risk_level: data.risk_level ?? null,
+          risk_score: data.risk_score ?? null,
+          max_temp: data.max_temp ?? null,
+          avg_humidity: data.avg_humidity ?? null,
+          max_wind: data.max_wind ?? null,
+          rain_last_30_days: data.rain_last_30_days ?? null,
+          createdAt: serverTimestamp(),
+        };
+
+        addDoc(
+          collection(
+            db,
+            "users",
+            predictionUser.uid,
+            "predictionHistory"
+          ),
+          historyRecord
+        ).catch((saveError) => {
+          console.error(
+            "Prediction succeeded, but history could not be saved:",
+            saveError
+          );
+        });
+      }
 
       setAnalysedLocations((previous) => {
         const analysis = {
@@ -161,6 +204,10 @@ function App() {
     {
       label: "About",
       icon: Info,
+    },
+    {
+      label: "Contact",
+      icon: Mail,
     },
   ];
 
@@ -249,7 +296,35 @@ function App() {
         </aside>
 
         <main className="main">
-        {activePage === "Risk Map" ? (
+          <div className="main-content">
+        {activePage === "Contact" ? (
+          <Contact />
+        ) : activePage === "About" ? (
+
+          <AboutPage />
+
+        ) : activePage === "Settings" ? (
+          <SettingsPage onNavigate={setActivePage} />
+        ) : activePage === "Saved Locations" ? (
+          <SavedLocations
+            onViewMap={(savedLocation) => {
+              setLocation({
+                lat: Number(savedLocation.lat),
+                lng: Number(savedLocation.lng),
+                name: savedLocation.name || savedLocation.customName,
+                source: "search",
+              });
+              setActivePage("Risk Map");
+            }}
+          />
+        ) : activePage === "History" ? (
+          <PredictionHistory
+            onViewMap={(record) => {
+              selectSavedAnalysis(record);
+              setActivePage("Risk Map");
+            }}
+          />
+        ) : activePage === "Risk Map" ? (
           <RiskMap
             location={location}
             setLocation={setLocation}
@@ -476,6 +551,8 @@ function App() {
           </div>
         </>
         )}
+          </div>
+          <Footer onNavigate={setActivePage} />
         </main>
       </div>
     </div>

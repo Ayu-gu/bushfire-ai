@@ -1,0 +1,284 @@
+.auth-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(13, 23, 33, 0.58);
+  backdrop-filter: blur(5px);
+}
+
+.auth-modal {
+  position: relative;
+  width: min(100%, 430px);
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 36px;
+  background: #ffffff;
+  border: 1px solid #e7eaed;
+  border-radius: 16px;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.2);
+}
+
+.auth-close {
+  position: absolute;
+  top: 17px;
+  right: 17px;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 7px;
+  color: #77838e;
+  background: transparent;
+  cursor: pointer;
+}
+
+.auth-close:hover {
+  background: #f1f3f5;
+  color: #17212b;
+}
+
+.auth-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  color: #18232d;
+  font-size: 15px;
+  font-weight: 750;
+}
+
+.auth-brand img {
+  width: 25px;
+  height: 30px;
+  object-fit: contain;
+}
+
+.auth-heading {
+  margin: 24px 0;
+  text-align: center;
+}
+
+.auth-heading h2 {
+  margin: 0;
+  color: #18232d;
+  font-size: 25px;
+  font-weight: 750;
+  letter-spacing: -0.035em;
+}
+
+.auth-heading p {
+  margin: 10px 0 0;
+  color: #778491;
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.auth-google {
+  width: 100%;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: #ffffff;
+  border: 1px solid #dce2e7;
+  border-radius: 8px;
+  color: #27333e;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.auth-google-mark {
+  color: #4285f4;
+  font-size: 20px;
+  font-weight: 750;
+}
+
+.auth-divider {
+  position: relative;
+  margin: 23px 0;
+  text-align: center;
+}
+
+.auth-divider::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: #e9edf0;
+}
+
+.auth-divider span {
+  position: relative;
+  padding: 0 12px;
+  background: #ffffff;
+  color: #9aa5ae;
+  font-size: 11px;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.auth-form label {
+  color: #394651;
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.auth-input-wrap {
+  height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 0 13px;
+  margin-bottom: 10px;
+  background: #f8f9fa;
+  border: 1px solid #e2e7eb;
+  border-radius: 8px;
+  color: #929da7;
+}
+
+.auth-input-wrap:focus-within {
+  border-color: #8095a8;
+  background: #ffffff;
+}
+
+.auth-input-wrap input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #18232d;
+  font: inherit;
+  font-size: 12px;
+}
+
+.auth-forgot {
+  align-self: flex-end;
+  margin: -4px 0 9px;
+}
+
+.auth-submit {
+  width: 100%;
+  height: 44px;
+  margin-top: 4px;
+  background: #202b35;
+  border: 0;
+  border-radius: 8px;
+  color: #ffffff;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.auth-submit:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.auth-footer {
+  margin-top: 22px;
+  text-align: center;
+  color: #83909b;
+  font-size: 12px;
+}
+
+.auth-footer p {
+  margin: 0;
+}
+
+.auth-text-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #d65c32;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.auth-text-button:hover {
+  text-decoration: underline;
+}
+
+.auth-trust {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 25px;
+  padding: 12px;
+  background: #f5f7f8;
+  border-radius: 8px;
+  color: #8a969f;
+  font-size: 10px;
+  line-height: 1.6;
+}
+
+.auth-trust svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+@media (max-width: 480px) {
+  .auth-modal {
+    padding: 28px 22px;
+  }
+}
+
+/* Authentication modal branding improvements */
+
+.auth-brand {
+  gap: 12px;
+  font-size: 19px;
+  font-weight: 750;
+}
+
+.auth-brand img {
+  width: 42px;
+  height: 48px;
+  object-fit: contain;
+}
+
+/* Keep the authentication overlay above map controls */
+
+.auth-overlay {
+  z-index: 2147483647;
+  isolation: isolate;
+}
+
+.auth-google:not(:disabled) {
+  cursor: pointer;
+  transition: background 150ms ease, border-color 150ms ease;
+}
+
+.auth-google:not(:disabled):hover {
+  background: #f7f9fb;
+  border-color: #b7c4ce;
+}
+
+.auth-google:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+.auth-error {
+  margin: 10px 0 0;
+  color: #b42318;
+  font-size: 11px;
+  line-height: 1.5;
+}

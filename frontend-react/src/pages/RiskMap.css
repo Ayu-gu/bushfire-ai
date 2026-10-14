@@ -573,3 +573,53 @@
 .risk-comparison-row--selected:hover {
   background: #e5f2ea;
 }
+
+.risk-save-location {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 12px 16px;
+  margin-bottom: 10px;
+  border: 1px solid #d6e0e8;
+  border-radius: 9px;
+  background: #ffffff;
+  color: #243647;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.risk-save-location:hover:not(:disabled) {
+  background: #f0f7f3;
+  border-color: #91bba3;
+}
+
+.risk-save-location:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.risk-save-message {
+  margin: 8px 0 12px;
+  font-size: 12px;
+  color: #28724b;
+}
+
+.risk-save-location.is-saved {
+  background: #eaf6ee;
+  border-color: #b7dec5;
+  color: #247647;
+  opacity: 1;
+}
+
+.risk-save-location.is-saved:disabled {
+  opacity: 1;
+  cursor: default;
+}
+
+.risk-save-location.is-saved svg {
+  fill: #247647;
+  stroke: #247647;
+}

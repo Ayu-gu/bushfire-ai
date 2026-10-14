@@ -17,7 +17,13 @@ function MapTilerMap({
   const marker = useRef(null);
   const analysisMarkers = useRef([]);
 
-  const [mapStyle, setMapStyle] = useState("streets");
+  const [mapStyle, setMapStyle] = useState(() => {
+    const saved = localStorage.getItem("bushfire-map-style");
+
+    return ["streets", "satellite", "terrain"].includes(saved)
+      ? saved
+      : "streets";
+  });
   const mapTypes = [
     {
       id: "streets",
@@ -47,7 +53,11 @@ function MapTilerMap({
 
     map.current = new maptilersdk.Map({
   container: mapContainer.current,
-  style: maptilersdk.MapStyle.STREETS,
+  style: {
+    streets: maptilersdk.MapStyle.STREETS,
+    satellite: maptilersdk.MapStyle.SATELLITE,
+    terrain: maptilersdk.MapStyle.TOPO,
+  }[mapStyle],
 
   center: [149.13, -35.28],
   zoom: 9,
@@ -284,6 +294,7 @@ function MapTilerMap({
 
   map.current.setStyle(selectedStyle);
   setMapStyle(style);
+  localStorage.setItem("bushfire-map-style", style);
 
   map.current.once("style.load", () => {
     map.current?.resize();
