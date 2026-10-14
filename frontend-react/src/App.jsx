@@ -1,3 +1,4 @@
+import ClimateNews from "./pages/ClimateNews";
 import { useState } from "react";
 import {
   LayoutDashboard,
@@ -190,6 +191,8 @@ function App() {
         <main className="main">
         {activePage === "Fire Warnings" ? (
           <FireWarnings />
+        ) : activePage === "Climate News" ? (
+          <ClimateNews />
         ) : activePage === "AI Prediction" ? (
           <AIPrediction
           location={location}

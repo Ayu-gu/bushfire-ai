@@ -154,6 +154,76 @@ app.get("/api/fire-incidents", async (req, res) => {
   }
 });
 
+
+// Climate News — The Conversation Australia RSS feed
+const Parser = require("rss-parser");
+
+const newsParser = new Parser({
+  timeout: 10000,
+  headers: {
+    "User-Agent": "BushfireAI/1.0",
+  },
+});
+
+const CLIMATE_NEWS_FEED =
+  "https://theconversation.com/au/environment/articles.atom";
+
+let climateNewsCache = null;
+let climateNewsCacheTime = 0;
+
+app.get("/api/climate-news", async (req, res) => {
+  const cacheDuration = 15 * 60 * 1000;
+
+  try {
+    if (
+      climateNewsCache &&
+      Date.now() - climateNewsCacheTime < cacheDuration
+    ) {
+      return res.json(climateNewsCache);
+    }
+
+    const feed = await newsParser.parseURL(CLIMATE_NEWS_FEED);
+
+    const articles = feed.items.map((item, index) => ({
+      id: item.guid || item.link || String(index),
+      title: item.title || "Untitled article",
+      link: item.link || "",
+      publishedAt: item.isoDate || item.pubDate || null,
+      description: (item.contentSnippet || item.summary || "")
+        .replace(/<[^>]*>/g, "")
+        .trim()
+        .slice(0, 350),
+      source: "The Conversation Australia",
+      category: "Environment & Climate",
+    }));
+
+    climateNewsCache = {
+      source: "The Conversation Australia",
+      fetchedAt: new Date().toISOString(),
+      count: articles.length,
+      articles,
+    };
+
+    climateNewsCacheTime = Date.now();
+
+    res.json(climateNewsCache);
+  } catch (error) {
+    console.error("Climate news fetch failed:", error.message);
+
+    if (climateNewsCache) {
+      return res.json({
+        ...climateNewsCache,
+        stale: true,
+      });
+    }
+
+    res.status(502).json({
+      error: "Climate news feed is temporarily unavailable.",
+      articles: [],
+    });
+  }
+});
+
 app.use(express.static(frontendPath));
 
 app.get(/.*/, (req, res) => {
