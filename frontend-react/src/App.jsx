@@ -1,5 +1,6 @@
 import ClimateNews from "./pages/ClimateNews";
-import { useState } from "react";
+import RiskMap from "./pages/RiskMap";
+import { useCallback, useRef, useState } from "react";
 import {
   LayoutDashboard,
   Map,
@@ -25,16 +26,38 @@ const DEV_MODE = false;
 
 function App() {
   const [activePage, setActivePage] = useState("Dashboard");
-  const [location, setLocation] = useState(null);
+  const [location, setSelectedLocation] = useState(null);
+
+  const setLocation = useCallback((nextLocation) => {
+    setSelectedLocation((previous) =>
+      typeof nextLocation === "function"
+        ? nextLocation(previous)
+        : nextLocation
+    );
+
+    predictionRequestId.current += 1;
+    setResult(null);
+    setLoading(false);
+    setError("");
+  }, []);
   const [result, setResult] = useState(null);
+  const [analysedLocations, setAnalysedLocations] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const predictionRequestId = useRef(0);
 
   const analyseRisk = async () => {
     if (!location) return;
 
+    const requestId = ++predictionRequestId.current;
+    const selectedLocation = {
+      latitude: location.lat,
+      longitude: location.lng,
+    };
+
     setLoading(true);
     setError("");
+    setResult(null);
 
     try {
       const response = await fetch("/predict", {
@@ -42,10 +65,7 @@ function App() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          latitude: location.lat,
-          longitude: location.lng,
-        }),
+        body: JSON.stringify(selectedLocation),
       });
 
       if (!response.ok) {
@@ -53,14 +73,54 @@ function App() {
       }
 
       const data = await response.json();
+
+      if (requestId !== predictionRequestId.current) return;
+
       setResult(data);
+
+      setAnalysedLocations((previous) => {
+        const analysis = {
+          id: `${selectedLocation.latitude.toFixed(5)},${selectedLocation.longitude.toFixed(5)}`,
+          lat: selectedLocation.latitude,
+          lng: selectedLocation.longitude,
+          name: location.name || "Selected location",
+          ...data,
+          analysedAt: new Date().toISOString(),
+        };
+
+        return [
+          analysis,
+          ...previous.filter((item) => item.id !== analysis.id),
+        ].slice(0, 20);
+      });
     } catch (err) {
+      if (requestId !== predictionRequestId.current) return;
+
       console.error(err);
       setError("Unable to analyse this location.");
     } finally {
-      setLoading(false);
+      if (requestId === predictionRequestId.current) {
+        setLoading(false);
+      }
     }
   };
+
+  const selectSavedAnalysis = useCallback((analysis) => {
+    if (!analysis) return;
+
+    predictionRequestId.current += 1;
+    setLoading(false);
+    setError("");
+
+    setSelectedLocation({
+      lat: analysis.lat,
+      lng: analysis.lng,
+      name: analysis.name,
+      source: "saved-analysis",
+    });
+
+    setResult(analysis);
+  }, []);
 
   const navigation = [
     {
@@ -189,7 +249,26 @@ function App() {
         </aside>
 
         <main className="main">
-        {activePage === "Fire Warnings" ? (
+        {activePage === "Risk Map" ? (
+          <RiskMap
+            location={location}
+            setLocation={setLocation}
+            result={result}
+            loading={loading}
+            error={error}
+            onAnalyse={analyseRisk}
+            analysedLocations={analysedLocations}
+            onSelectAnalysis={selectSavedAnalysis}
+            onRemoveAnalysis={(id) => {
+              setAnalysedLocations((previous) =>
+                previous.filter((item) => item.id !== id)
+              );
+            }}
+            onClearAnalyses={() => {
+              setAnalysedLocations([]);
+            }}
+          />
+        ) : activePage === "Fire Warnings" ? (
           <FireWarnings />
         ) : activePage === "Climate News" ? (
           <ClimateNews />

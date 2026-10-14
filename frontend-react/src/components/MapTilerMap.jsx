@@ -4,12 +4,18 @@ import * as maptilersdk from "@maptiler/sdk";
 import "@maptiler/sdk/dist/maptiler-sdk.css";
 import "./MapTilerMap.css";
 
-function MapTilerMap({ location, setLocation }) {
+function MapTilerMap({
+  location,
+  setLocation,
+  analysedLocations = [],
+  onSelectAnalysis,
+}) {
   const mapContainer = useRef(null);
   const mapWrapper = useRef(null);
 
   const map = useRef(null);
   const marker = useRef(null);
+  const analysisMarkers = useRef([]);
 
   const [mapStyle, setMapStyle] = useState("streets");
   const mapTypes = [
@@ -136,6 +142,20 @@ function MapTilerMap({ location, setLocation }) {
     location.lat,
   ];
 
+  // Hide the temporary marker when this location
+  // already has a colour-coded prediction marker.
+  const alreadyAnalysed = analysedLocations.some(
+    (item) =>
+      Math.abs(item.lat - location.lat) < 0.00001 &&
+      Math.abs(item.lng - location.lng) < 0.00001
+  );
+
+  if (alreadyAnalysed) {
+    marker.current?.remove();
+    marker.current = null;
+    return;
+  }
+
   // Create or move the location marker
   if (!marker.current) {
     marker.current = new maptilersdk.Marker({
@@ -149,7 +169,10 @@ function MapTilerMap({ location, setLocation }) {
 
   // Locations selected through search should
   // move the camera to the result.
-  if (location.source === "search") {
+  if (
+    location.source === "search" ||
+    location.source === "saved-analysis"
+  ) {
     map.current.flyTo({
       center: coordinates,
       zoom: 12,
@@ -159,7 +182,57 @@ function MapTilerMap({ location, setLocation }) {
       essential: true,
     });
   }
-}, [location]);
+}, [location, analysedLocations]);
+
+  // ==================================================
+  // COMPLETED AI PREDICTION MARKERS
+  // ==================================================
+
+  useEffect(() => {
+    if (!map.current) return;
+
+    analysisMarkers.current.forEach((item) => item.remove());
+    analysisMarkers.current = [];
+
+    const riskColors = {
+      VERY_LOW: "#167347",
+      LOW: "#22a06b",
+      MODERATE: "#e6ae31",
+      HIGH: "#eb7736",
+      VERY_HIGH: "#dc3545",
+      EXTREME: "#991b1b",
+    };
+
+    analysedLocations.forEach((item) => {
+      const level = String(item.risk_level || "")
+        .toUpperCase()
+        .replace(/\\s+/g, "_");
+
+      const color = riskColors[level] || "#64748b";
+
+      const predictionMarker = new maptilersdk.Marker({
+        color,
+      })
+        .setLngLat([item.lng, item.lat])
+        .addTo(map.current);
+
+      const element = predictionMarker.getElement();
+      element.style.cursor = "pointer";
+      element.title = `${item.name || "Analysed location"}: ${item.risk_level}`;
+
+      element.addEventListener("click", (event) => {
+        event.stopPropagation();
+        onSelectAnalysis?.(item);
+      });
+
+      analysisMarkers.current.push(predictionMarker);
+    });
+
+    return () => {
+      analysisMarkers.current.forEach((item) => item.remove());
+      analysisMarkers.current = [];
+    };
+  }, [analysedLocations, onSelectAnalysis]);
 
   // ==================================================
   // FULLSCREEN STATE
