@@ -12,6 +12,8 @@
 
 ## Platform Preview
 
+![FireScope AI Dashboard](https://github.com/user-attachments/assets/bb663708-5714-456c-ac0c-e2af91808955)
+
 
 
 *Interactive dashboard with location selection, environmental conditions, and access to the application's main tools.*
@@ -57,6 +59,8 @@ The project demonstrates **end-to-end engineering**, from environmental feature 
 Some functions depend on third-party services, authentication, network access, and available data. See [Limitations](docs/LIMITATIONS.md) and [Testing](docs/TESTING.md) for the evidence and verification boundaries.
 
 ## How It Works
+
+![FireScope AI Prediction Workflow](https://github.com/user-attachments/assets/e878cf94-af23-4683-8a25-2358fe28a0c9)
 
 
 
