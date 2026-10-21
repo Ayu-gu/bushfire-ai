@@ -93,6 +93,8 @@ For component responsibilities, endpoints, and data flow, see [System Architectu
 
 ## Neural Network
 
+![FireScope AI Neural Network Visualisation](https://github.com/user-attachments/assets/8793b15a-45ba-496d-bc3f-d38d563da45e)
+
 
 
 *Application visualisation of the latest inference, showing the feed-forward network and its activation patterns. The displayed example is not a validation metric.*
