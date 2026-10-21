@@ -195,3 +195,30 @@ The table records implementation considerations, not verified production defects
 ## 13. Conclusion
 
 FireScope AI demonstrates an integrated full-stack application in which a browser-based React interface communicates with an Express backend that orchestrates Python/PyTorch inference. Firebase handles identity and user records, while mapping, NSW RFS incidents, and environmental news provide supporting context. The architecture is suitable for demonstrating end-to-end engineering, while performance, security, model validation, and resilience require further evidence before any higher-stakes use.
+
+---
+
+## Production Account Deletion Architecture — October 2026
+
+The account deletion workflow extends the existing React, Express, Firebase Authentication, and Firestore architecture.
+
+### Request flow
+
+1. The user initiates deletion from the React Settings page.
+2. The frontend requires explicit confirmation and recent Firebase reauthentication.
+3. The frontend sends an authenticated request to `POST /api/account/delete`.
+4. The Express backend verifies the Firebase ID token and recent authentication.
+5. A Firestore transaction creates or updates the server-managed deletion job.
+6. A backend worker recursively removes the user's Firestore data.
+7. The worker deletes the Firebase Authentication user after the data cleanup.
+8. The job records completion or a recoverable failure state.
+
+### Backend components
+
+- **Firebase Admin SDK:** Privileged server-side authentication and Firestore operations.
+- **Deletion jobs:** `accountDeletionJobs/{uid}`.
+- **User deletion marker:** `users/{uid}.deletionStatus`.
+- **Recovery worker:** Background processing with retry handling and lease-based coordination.
+- **Production credentials:** A service account JSON file stored outside the Git repository and application source tree.
+
+The account deletion API and recovery worker use independently configurable environment flags. Production deployment has both features enabled.

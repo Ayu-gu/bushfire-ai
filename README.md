@@ -268,3 +268,22 @@ FireScope AI is an **educational and experimental project**. Weather inputs may 
 
 **Aiigo**  
 Software Engineering · Machine Learning · Infrastructure
+
+---
+
+## Final Implementation Update — October 2026
+
+FireScope AI now includes a secure Firebase account deletion workflow.
+
+- Users can request account deletion from Settings after confirming their intention.
+- Firebase Authentication verifies the user's identity and recent sign-in.
+- The Express backend validates the Firebase ID token before accepting a deletion request.
+- Firestore tracks deletion progress using server-managed deletion jobs.
+- A background worker removes the user's stored data and Firebase Authentication account.
+- Failed operations can be retried through the recovery workflow.
+- Production Firestore rules restrict access to user-owned prediction history and saved locations.
+
+**Verification:** 21 automated backend tests passed. The deletion workflow was also tested using two disposable Firebase accounts, both successfully removed.
+
+The application is deployed at:
+https://2026s2a2.winproject.com.au/

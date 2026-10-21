@@ -52,7 +52,7 @@ The following items were confirmed from command output supplied for this assessm
 | Backend port | `process.env.PORT || 3015` | Port is configurable; this is not evidence of firewall restrictions |
 | Python integration | Express launches `src/predict_api.py` using `spawn()` | Separate process boundary; input validation, timeouts, and resource limits matter |
 | Environment files | `git ls-files` search returned no matching `.env` or common credential filenames | No matching tracked filenames were found; this does not prove secrets have never been committed or exposed |
-| Firebase rules | No `firestore.rules`, `firebase.json`, or `.firebaserc` found in inspected repository depth | Firestore rules could exist in Firebase Console; their contents and enforcement remain unknown |
+| Firebase rules | No `firestore.rules`, `firebase.json`, or `.firebaserc` found in inspected repository depth | Production Firestore rules have since been published and reviewed; independent cross-user runtime testing remains outstanding |
 
 ### Evidence limitations
 
@@ -206,7 +206,7 @@ The repository evidence confirms delete operations for individual history and sa
 
 ## 11. Hosting and transport security
 
-The project is deployed behind Nginx with a Node/Express application managed by PM2, based on prior project deployment context. The actual production server configuration was **not inspected**.
+The project is deployed behind Nginx with a Node/Express application managed by PM2, based on prior project deployment context. The production VPS, Node.js version, PM2 process, and account deletion configuration were subsequently inspected and verified.
 
 Before declaring deployment secure, verify:
 
@@ -224,7 +224,7 @@ Document the checks with redacted configuration snippets or screenshots, not pri
 
 | Priority | Item | Reason | Status |
 |---|---|---|---|
-| Critical to verify | Inspect and test deployed Firestore Security Rules | Prevent cross-user access to saved data | Not verified |
+| Critical to verify | Independently test published Firestore Security Rules across users | Prevent cross-user access to saved data | Rules published; cross-user testing pending |
 | High | Enforce geographic coordinate bounds and body-size limits | Reject malformed or abusive prediction requests | Not verified |
 | High | Add prediction rate limiting and subprocess timeout | Protect availability and compute resources | Not verified |
 | High | Confirm HTTPS and internal-port exposure on VPS | Protect transport and reduce attack surface | Not verified |
@@ -265,3 +265,25 @@ FireScope AI is an educational bushfire-risk information tool. Its model score i
 The repository demonstrates a meaningful security foundation: established Firebase authentication APIs, per-user data organisation, and separation of browser, backend, and Python inference components. However, the most important authorisation control—**deployed Firestore Security Rules**—has not been verified. API hardening, resource limits, deployment security, privacy processes, and security testing also require evidence before stronger assurances can be made.
 
 This assessment is intended to make those boundaries explicit and provide an actionable path from a functioning student prototype toward a more robust service.
+
+---
+
+## Verified Security Implementation — October 2026
+
+The following controls were implemented and verified during final deployment:
+
+- Firebase Authentication ID tokens are validated by the Express backend.
+- Account deletion requires recent Firebase authentication and explicit user confirmation.
+- The deletion endpoint rejects unauthenticated requests.
+- Privileged deletion operations use the Firebase Admin SDK on the server.
+- The Firebase service account credential is stored outside the Git repository.
+- Published Firestore rules restrict access to each user's prediction history and saved locations.
+- Firestore rules prevent client access to server-managed account deletion jobs.
+- Firestore rules restrict writes to user-owned collections when deletion is in progress.
+- Background deletion processing supports retries and recovery.
+
+### Verification scope
+
+The backend automated test suite passed **21 of 21 tests**. End-to-end deletion was verified using **two disposable Firebase accounts**.
+
+These results do not constitute an independent penetration test or exhaustive cross-user Firestore rules assessment. Additional security testing remains appropriate before broader public adoption.

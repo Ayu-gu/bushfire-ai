@@ -241,7 +241,7 @@ External feeds may be delayed or unavailable. The backend applies caching and re
 - **Input validation:** Backend numeric coordinate parsing is known; geographic range validation should be reviewed and strengthened.
 - **Subprocess lifecycle:** An explicit timeout for the Python subprocess has not been verified and should be considered.
 - **Rate limiting:** Production request throttling and abuse protection should be independently verified.
-- **Firestore rules:** Actual production rules have not been reviewed for this document.
+- **Firestore rules:** Production rules were subsequently published and reviewed; independent cross-user testing remains outstanding.
 - **Observability:** Structured logging, uptime alerts, and error monitoring are recommended but not verified as implemented.
 - **Recovery:** A documented rollback procedure and recovery drill have not been verified.
 
@@ -289,3 +289,44 @@ Do not use force pushes, destructive Git resets, blanket process kills, or unver
 ---
 
 **Documentation principle:** A reliable deployment guide separates verified source configuration, known architecture, recommended operating procedure, and production facts that still require direct confirmation.
+
+---
+
+## Verified Production Deployment — October 2026
+
+The following production details were directly verified during the final deployment.
+
+| Component | Verified configuration |
+|---|---|
+| Host operating system | Ubuntu 24.04 |
+| Node.js | v22.23.2 |
+| Application path | `~/htdocs/2026s2a2.winproject.com.au/app` |
+| Backend process | PM2: `bushfire-ai-backend` |
+| Backend port | 3015 |
+| Production revision | `4e30f58` |
+| Frontend | Vite production build |
+| Authentication | Firebase Authentication |
+| Database | Cloud Firestore |
+| Privileged operations | Firebase Admin SDK |
+
+The production backend uses a PM2 ecosystem configuration stored outside the Git repository.
+
+The Firebase service account JSON credential is stored outside the application repository under the VPS user's private configuration directory.
+
+The account deletion request endpoint and background recovery worker were enabled in production.
+
+### Deployment verification
+
+- Git revision `4e30f58` was deployed.
+- Backend dependencies were installed.
+- The frontend production build completed.
+- PM2 restarted the backend successfully.
+- The public website returned HTTP 200.
+- The deletion endpoint rejected unauthenticated requests with HTTP 401.
+- Backend logs confirmed that the deletion recovery scheduler started.
+
+### Developer profile image
+
+The developer profile image is intentionally excluded from Git tracking. It is stored directly in the VPS frontend's `public/` and `dist/` directories.
+
+Future deployments must preserve or restore this image because it is not included in Git-based deployments.

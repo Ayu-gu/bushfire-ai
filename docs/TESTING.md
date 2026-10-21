@@ -26,7 +26,7 @@ The frontend `package.json` declares the following scripts:
 | Script | Command | Meaning | Current execution status |
 |---|---|---|---|
 | `dev` | `vite` | Development server | Not verified in this report |
-| `build` | `vite build` | Production build | Not verified in this report |
+| `build` | `vite build` | Production build | Passed during final deployment |
 | `lint` | `oxlint` | Static analysis | Not verified in this report |
 | `preview` | `vite preview` | Preview compiled frontend | Not verified in this report |
 | `start` | `node backend/server.js` | Start Express backend | Not verified in this report |
@@ -37,7 +37,7 @@ Specialised Python scripts were identified:
 - `src/test_ga_elevation_wcs.py`
 - `src/test_vegetation_attributes.py`
 
-Their names suggest data-source or feature-processing checks, but their contents and execution outcomes have **not** been reviewed. No dedicated React unit-test suite or Express API automated-test suite was identified in the supplied repository search. A test file found under `frontend-react/backend/node_modules/` belongs to a third-party dependency, not the application's own test suite.
+Their names suggest data-source or feature-processing checks, but their contents and execution outcomes have **not** been reviewed. A dedicated React unit-test suite has not been documented. A backend automated-test suite was subsequently implemented and passed 21 of 21 tests. A test file found under `frontend-react/backend/node_modules/` belongs to a third-party dependency, not the application's own test suite.
 
 ## 3. Verification Status Summary
 
@@ -49,7 +49,7 @@ Their names suggest data-source or feature-processing checks, but their contents
 | Saved locations | Firestore create, duplicate check, subscription and delete code inspected | Implemented; test not recorded |
 | Official fire incidents | NSW RFS retrieval, validation, 60-second cache and HTTP 502 error path inspected | Implemented; test not recorded |
 | Climate news | RSS parser and 15-minute cache configuration identified | Implemented; test not recorded |
-| Production build | Build command exists | Not executed for this report |
+| Production build | Vite production build | Passed during final deployment |
 | Linting | Lint command exists | Not executed for this report |
 | Deployed-model accuracy | No verified V04 evaluation report supplied | **Unknown** |
 | Experimental model evaluation | Stage 11, Stage 13B, Stage 14A saved metrics reviewed | Recorded experimental evidence |
@@ -189,8 +189,8 @@ The Python weather request shown in the inspected inference code uses a 30-secon
 | D-01 | Latitude/longitude geographic bounds not checked in inspected Express route | `frontend-react/backend/server.js` | Medium | Open |
 | D-02 | No dedicated prediction child-process timeout identified | `frontend-react/backend/server.js` | Medium | Open |
 | D-03 | No verified deployed V04 evaluation metrics supplied | Evidence review | High for predictive claims | Open |
-| D-04 | No dedicated frontend/API automated-test suite identified | File/script inspection | Medium | Open |
-| D-05 | Firestore security rules not inspected | Evidence review | High for privacy assurance | Verification pending |
+| D-04 | No dedicated frontend UI automated-test suite documented; backend suite now has 21 passing tests | Final test verification | Medium | Partially addressed |
+| D-05 | Published Firestore rules reviewed; independent cross-user runtime tests outstanding | Final security verification | High for privacy assurance | Partially addressed |
 
 These are documented findings or verification gaps, **not** claims of observed production incidents.
 
@@ -218,3 +218,44 @@ A credible academic submission can report incomplete testing as long as the dist
 - [Database Design](DATABASE_DESIGN.md)
 - [Security](SECURITY.md)
 - [Limitations](LIMITATIONS.md)
+
+---
+
+## Final Verification Results — October 2026
+
+### Automated backend tests
+
+Command:
+
+`node --test frontend-react/backend/tests/*.test.js`
+
+**Result: 21 tests passed out of 21.**
+
+Eight additional structural safety checks were also completed.
+
+### Firebase integration testing
+
+The account deletion workflow was tested with two disposable Firebase accounts.
+
+Verified outcomes:
+
+- Authenticated deletion requests were processed.
+- Firestore account deletion jobs completed.
+- Disposable users' Firebase Authentication accounts were removed.
+- Associated user records were removed.
+
+### Production verification
+
+- React/Vite production build completed successfully.
+- Backend dependencies installed successfully.
+- PM2 reported the production backend online.
+- The public website returned HTTP 200.
+- The unauthenticated account deletion endpoint rejected requests with HTTP 401.
+- The account deletion recovery scheduler started successfully.
+
+### Remaining testing limitations
+
+- No independent, comprehensive cross-user Firestore rules test suite has been documented.
+- No complete automated frontend UI test suite has been documented.
+- The final production deployment verification does not independently establish the predictive accuracy of the trained V04 machine-learning model.
+- The Vite build reported a JavaScript chunk-size warning; this was not a build failure.

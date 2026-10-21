@@ -219,3 +219,33 @@ Test outcomes should be recorded in [Testing and Validation](TESTING.md); none a
 The inspected FireScope AI implementation uses two user-scoped Firestore subcollections: **prediction history** and **saved locations**. The design supports automatic document creation, real-time list updates, and deletion, while Firebase Authentication supplies the UID used in document paths.
 
 The principal outstanding database-design verification is the deployed **Firestore Security Rules**, followed by runtime tests of reads, writes, duplicate handling, and cross-user access restrictions.
+
+---
+
+## Account Deletion Data Model — October 2026
+
+The production application now includes server-managed account deletion metadata.
+
+### `users/{uid}`
+
+The user document can hold deletion state metadata, including a `deletionStatus` marker used to prevent further writes during deletion.
+
+A user parent document is not necessarily created during ordinary account usage; it can be created or updated when the deletion workflow begins.
+
+### `accountDeletionJobs/{uid}`
+
+A dedicated server-managed Firestore collection records account deletion processing and recovery information.
+
+The backend uses these jobs to coordinate deletion, record progress, handle retries, and identify operations needing attention.
+
+### Deletion behaviour
+
+The worker recursively removes the user's Firestore subcollections, including prediction history and saved locations, before removing the Firebase Authentication account.
+
+Deletion jobs are retained for operational tracking rather than exposed to frontend users.
+
+### Access control
+
+Published Firestore security rules restrict user-owned data to the authenticated owner, block writes while deletion is underway, and deny direct client access to deletion jobs.
+
+Privileged cleanup is performed by the backend using the Firebase Admin SDK.
