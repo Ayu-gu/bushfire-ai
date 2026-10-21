@@ -402,3 +402,167 @@
     flex-direction: column;
   }
 }
+
+
+/* Danger Zone */
+
+.settings-account-deletion-section {
+  margin-top: 24px;
+  border: 1px solid #f0d3d3;
+}
+
+.settings-danger-icon {
+  background: #fff0f0;
+  color: #c44242;
+}
+
+.settings-danger-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 22px 25px;
+}
+
+.settings-danger-content strong {
+  color: #263441;
+  font-size: 13px;
+}
+
+.settings-danger-content p {
+  margin: 7px 0 0;
+  color: #8493a1;
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.settings-delete-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  padding: 11px 15px;
+  border: 1px solid #e5c8c8;
+  border-radius: 9px;
+  background: #fff6f6;
+  color: #b34444;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.settings-delete-button:hover {
+  background: #ffecec;
+}
+
+.settings-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(17, 24, 39, 0.6);
+}
+
+.settings-delete-modal {
+  width: 100%;
+  max-width: 440px;
+  padding: 30px;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+}
+
+.settings-delete-modal > svg {
+  color: #c44242;
+}
+
+.settings-delete-modal h2 {
+  margin: 16px 0 10px;
+  color: #263441;
+  font-size: 21px;
+}
+
+.settings-delete-modal p {
+  color: #778898;
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.settings-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 25px;
+}
+
+.settings-modal-actions button {
+  padding: 11px 16px;
+  border: 1px solid #dce3e8;
+  border-radius: 9px;
+  background: #ffffff;
+  color: #263441;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.settings-modal-actions .settings-confirm-delete {
+  border-color: #c44242;
+  background: #c44242;
+  color: #ffffff;
+}
+
+.settings-confirm-delete:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+@media (max-width: 650px) {
+  .settings-danger-content {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .settings-modal-actions {
+    flex-direction: column;
+  }
+}
+
+
+/* Account deletion confirmation */
+.settings-delete-label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 18px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.settings-delete-label input {
+  width: 100%;
+  padding: 11px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #fff;
+  color: #0f172a;
+  font: inherit;
+  font-weight: 400;
+  outline: none;
+}
+
+.settings-delete-label input:focus {
+  border-color: #64748b;
+  box-shadow: 0 0 0 3px rgba(100, 116, 139, 0.12);
+}
+
+.settings-delete-verified {
+  margin-top: 14px;
+  color: #15803d;
+  font-size: 13px;
+  font-weight: 600;
+}

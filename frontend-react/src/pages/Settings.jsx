@@ -12,20 +12,149 @@ import {
   ArrowUpRight,
   LockKeyhole,
   LogOut,
+  Trash2,
 } from "lucide-react";
 import {
   onAuthStateChanged,
   sendEmailVerification,
   signOut,
+  EmailAuthProvider,
+  reauthenticateWithCredential,
+  reauthenticateWithPopup,
 } from "firebase/auth";
 
-import { auth } from "../firebase";
+import { auth, googleProvider } from "../firebase";
 import "./Settings.css";
 
 export default function Settings({ onNavigate }) {
   const [user, setUser] = useState(null);
   const [authReady, setAuthReady] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [deletePassword, setDeletePassword] = useState("");
+  const [deleteConfirmation, setDeleteConfirmation] = useState("");
+  const [deleteAuthLoading, setDeleteAuthLoading] = useState(false);
+  const [deleteAuthVerified, setDeleteAuthVerified] = useState(false);
+  const [deleteAuthError, setDeleteAuthError] = useState("");
+
+  const closeDeleteDialog = () => {
+    if (deleteAuthLoading) return;
+
+    setShowDeleteDialog(false);
+    setDeletePassword("");
+    setDeleteConfirmation("");
+    setDeleteAuthVerified(false);
+    setDeleteAuthError("");
+  };
+
+  const confirmDeleteIdentity = async () => {
+    if (!user || deleteAuthLoading) return;
+
+    setDeleteAuthLoading(true);
+    setDeleteAuthError("");
+    setDeleteAuthVerified(false);
+
+    try {
+      if (hasPassword) {
+        const credential = EmailAuthProvider.credential(
+          user.email,
+          deletePassword
+        );
+
+        await reauthenticateWithCredential(user, credential);
+      } else if (hasGoogle) {
+        const result = await reauthenticateWithPopup(
+          user,
+          googleProvider
+        );
+
+        if (result.user.uid !== user.uid) {
+          throw new Error("The selected Google account does not match.");
+        }
+      } else {
+        throw new Error("This sign-in method is not supported yet.");
+      }
+
+      setDeleteAuthVerified(true);
+    } catch (error) {
+      console.error("Account reauthentication failed:", error.code);
+      setDeleteAuthError(
+        error.code === "auth/wrong-password" ||
+        error.code === "auth/invalid-credential"
+          ? "Incorrect password. Please try again."
+          : error.message ===
+              "The selected Google account does not match."
+            ? error.message
+            : "Unable to verify your identity. Please try again."
+      );
+    } finally {
+      setDeleteAuthLoading(false);
+    }
+  };
+  const requestPermanentDeletion = async () => {
+    if (
+      !user ||
+      !deleteAuthVerified ||
+      deleteConfirmation !== "DELETE" ||
+      deleteAuthLoading
+    ) {
+      return;
+    }
+
+    setDeleteAuthLoading(true);
+    setDeleteAuthError("");
+
+    try {
+      // Force a fresh token after Firebase reauthentication.
+      const idToken = await user.getIdToken(true);
+
+      const response = await fetch("/api/account/delete", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${idToken}`,
+        },
+      });
+
+      const result = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        if (result?.code === "REAUTHENTICATION_REQUIRED") {
+          setDeleteAuthVerified(false);
+        }
+
+        if (result?.code === "ACCOUNT_DELETION_DISABLED") {
+          throw new Error(
+            "Account deletion is not available yet."
+          );
+        }
+
+        throw new Error(
+          "Unable to request account deletion. Please try again."
+        );
+      }
+
+      if (response.status !== 202 || result?.status !== "pending") {
+        throw new Error(
+          "Unexpected server response. Please contact support."
+        );
+      }
+
+      // Only reached when the backend accepts the deletion job.
+      setShowDeleteDialog(false);
+      setDeleteAuthVerified(false);
+      setDeletePassword("");
+      setDeleteConfirmation("");
+
+      await signOut(auth);
+    } catch (error) {
+      setDeleteAuthError(
+        error.message || "Unable to request account deletion."
+      );
+    } finally {
+      setDeleteAuthLoading(false);
+    }
+  };
+
   const [accountError, setAccountError] = useState("");
   const [verificationLoading, setVerificationLoading] = useState(false);
   const [verificationMessage, setVerificationMessage] = useState("");
@@ -404,6 +533,135 @@ export default function Settings({ onNavigate }) {
           )}
         </div>
       </section>
+
+      {user && (
+        <section className="settings-section settings-account-deletion-section">
+          <div className="settings-section-heading">
+            <div className="settings-section-icon">
+              <UserRound size={20} />
+            </div>
+            <div>
+              <h2>Account Deletion</h2>
+              <p>Delete your account and associated data</p>
+            </div>
+          </div>
+
+          <div className="settings-danger-content">
+            <div>
+              <strong>Delete Account</strong>
+              <p>
+                Permanently delete your account, prediction history,
+                and saved locations. This action cannot be undone.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              className="settings-delete-button"
+              onClick={() => setShowDeleteDialog(true)}
+            >
+              <Trash2 size={16} />
+              Delete Account
+            </button>
+          </div>
+        </section>
+      )}
+
+      {showDeleteDialog && (
+        <div className="settings-modal-overlay">
+          <div
+            className="settings-delete-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-account-title"
+          >
+            <h2 id="delete-account-title">Delete your account?</h2>
+            <p>
+              Your FireScope AI account, saved locations, and
+              prediction history will be permanently deleted.
+            </p>
+
+            <label className="settings-delete-label">
+              Type DELETE to confirm
+              <input
+                type="text"
+                value={deleteConfirmation}
+                onChange={(event) => {
+                  setDeleteConfirmation(event.target.value);
+                  setDeleteAuthVerified(false);
+                }}
+                placeholder="DELETE"
+                autoComplete="off"
+              />
+            </label>
+
+            {hasPassword && (
+              <label className="settings-delete-label">
+                Current password
+                <input
+                  type="password"
+                  value={deletePassword}
+                  onChange={(event) => {
+                    setDeletePassword(event.target.value);
+                    setDeleteAuthVerified(false);
+                  }}
+                  placeholder="Enter your password"
+                  autoComplete="current-password"
+                />
+              </label>
+            )}
+
+            {deleteAuthError && (
+              <p className="settings-account-error" role="alert">
+                {deleteAuthError}
+              </p>
+            )}
+
+            {deleteAuthVerified && (
+              <p className="settings-delete-verified" role="status">
+                Identity verified successfully.
+              </p>
+            )}
+
+            <div className="settings-modal-actions">
+              <button
+                type="button"
+                onClick={closeDeleteDialog}
+                disabled={deleteAuthLoading}
+              >
+                Cancel
+              </button>
+
+              {!deleteAuthVerified ? (
+                <button
+                  type="button"
+                  className="settings-confirm-delete"
+                  onClick={confirmDeleteIdentity}
+                  disabled={
+                    deleteAuthLoading ||
+                    deleteConfirmation !== "DELETE" ||
+                    (hasPassword && !deletePassword)
+                  }
+                >
+                  {deleteAuthLoading
+                    ? "Verifying..."
+                    : "Verify Identity"}
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className="settings-confirm-delete"
+                  onClick={requestPermanentDeletion}
+                  disabled={deleteAuthLoading}
+                  title="Permanently delete your account"
+                >
+                  Delete Permanently
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

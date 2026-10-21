@@ -1,7 +1,9 @@
+const { startDeletionScheduler } = require("./accountDeletionScheduler");
 const express = require("express");
 const cors = require("cors");
 const { spawn } = require("node:child_process");
 const path = require("node:path");
+const accountDeletion = require("./accountDeletion");
 
 const app = express();
 
@@ -224,6 +226,8 @@ app.get("/api/climate-news", async (req, res) => {
   }
 });
 
+app.use("/api/account", accountDeletion);
+
 app.use(express.static(frontendPath));
 
 app.get(/.*/, (req, res) => {
@@ -235,3 +239,5 @@ app.listen(PORT, () => {
     `Bushfire AI running on http://localhost:${PORT}`
   );
 });
+
+startDeletionScheduler();
