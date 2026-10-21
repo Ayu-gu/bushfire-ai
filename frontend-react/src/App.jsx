@@ -213,7 +213,7 @@ function App() {
 
   return (
     <div className="app">
-      <Header setLocation={setLocation} />
+      <Header setLocation={setLocation} onNavigate={setActivePage} />
 
       <div className="app-body">
         <aside className="sidebar">

@@ -199,6 +199,8 @@ export default function Contact() {
   src="/developer-profile.jpg"
   alt="Ayub Gurung"
   className="contact-avatar-photo"
+  draggable={false}
+  onContextMenu={(event) => event.preventDefault()}
 />
 
             <span className="contact-profile-label">
@@ -233,6 +235,15 @@ export default function Contact() {
                 rel="noopener noreferrer"
               >
                 GitHub
+                <ExternalLink size={15} />
+              </a>
+
+              <a
+                href="https://www.instagram.com/mr.ayub_g/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Instagram
                 <ExternalLink size={15} />
               </a>
             </div>

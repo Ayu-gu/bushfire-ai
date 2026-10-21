@@ -15,12 +15,108 @@ import { auth } from "../firebase";
 import "./Header.css";
 import AuthModal from "./AuthModal";
 
-function Header({ setLocation }) {
+function Header({ setLocation, onNavigate }) {
   const [authOpen, setAuthOpen] = useState(false);
   const [user, setUser] = useState(null);
   const [authReady, setAuthReady] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const profileWrapper = useRef(null);
+
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [fireWarnings, setFireWarnings] = useState([]);
+  const [warningsLoading, setWarningsLoading] = useState(true);
+  const [warningsError, setWarningsError] = useState("");
+  const [warningsFetchedAt, setWarningsFetchedAt] = useState(null);
+  const notificationsWrapper = useRef(null);
+
+  useEffect(() => {
+    let active = true;
+    let controller;
+
+    async function loadWarnings() {
+      if (controller) controller.abort();
+      controller = new AbortController();
+
+      try {
+        const response = await fetch("/api/fire-incidents", {
+          signal: controller.signal,
+          cache: "no-store",
+        });
+
+        if (!response.ok) throw new Error("Incident feed unavailable");
+
+        const data = await response.json();
+
+        if (!Array.isArray(data.features)) {
+          throw new Error("Invalid incident feed");
+        }
+
+        if (!active) return;
+
+        const levels = ["emergency warning", "watch and act", "advice"];
+
+        const warnings = data.features
+          .filter((feature) =>
+            levels.includes(
+              String(feature.properties?.category || "").trim().toLowerCase()
+            )
+          )
+          .map((feature, index) => {
+            const properties = feature.properties || {};
+            const description = String(properties.description || "");
+            const locationMatch = description.match(
+              /LOCATION:\s*([^<]+)/i
+            );
+
+            return {
+              id: properties.guid || `warning-${index}`,
+              title: properties.title || "Unnamed incident",
+              category: properties.category,
+              location: locationMatch?.[1]?.trim() || "NSW",
+            };
+          })
+          .sort((a, b) =>
+            levels.indexOf(a.category.trim().toLowerCase()) -
+            levels.indexOf(b.category.trim().toLowerCase())
+          );
+
+        setFireWarnings(warnings);
+        setWarningsFetchedAt(data.fetchedAt || new Date().toISOString());
+        setWarningsError("");
+      } catch (error) {
+        if (!active || error.name === "AbortError") return;
+
+        setFireWarnings([]);
+        setWarningsFetchedAt(null);
+        setWarningsError("Unable to retrieve NSW RFS incidents.");
+      } finally {
+        if (active) setWarningsLoading(false);
+      }
+    }
+
+    loadWarnings();
+    const interval = window.setInterval(loadWarnings, 60000);
+
+    return () => {
+      active = false;
+      window.clearInterval(interval);
+      if (controller) controller.abort();
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleOutsideClick = (event) => {
+      if (
+        notificationsWrapper.current &&
+        !notificationsWrapper.current.contains(event.target)
+      ) {
+        setNotificationsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleOutsideClick);
+    return () => document.removeEventListener("mousedown", handleOutsideClick);
+  }, []);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -276,17 +372,89 @@ function Header({ setLocation }) {
           <span>Live</span>
         </div>
 
-        <button
-          className="header-icon-button"
-          type="button"
-          aria-label="Notifications"
-          title="Notifications"
-        >
-          <Bell
-            size={18}
-            strokeWidth={1.8}
-          />
-        </button>
+        <div className="header-notification-wrapper" ref={notificationsWrapper}>
+          <button
+            className="header-icon-button"
+            type="button"
+            aria-label="NSW fire warning information"
+            aria-expanded={notificationsOpen}
+            aria-controls="header-notification-panel"
+            title="NSW fire warning information"
+            onClick={() => {
+              setNotificationsOpen((open) => !open);
+              setProfileOpen(false);
+            }}
+          >
+            <Bell size={18} strokeWidth={1.8} />
+            {fireWarnings.length > 0 && (
+              <span className="header-notification-dot" />
+            )}
+          </button>
+
+          {notificationsOpen && (
+            <div
+              className="header-notification-panel"
+              id="header-notification-panel"
+            >
+              <div className="header-notification-heading">
+                <strong>NSW Fire Warnings</strong>
+                <span>NSW RFS incident feed</span>
+              </div>
+
+              <div className="header-notification-list">
+                {warningsLoading ? (
+                  <p className="header-notification-message">Loading incidents...</p>
+                ) : warningsError ? (
+                  <p className="header-notification-message">{warningsError}</p>
+                ) : fireWarnings.length === 0 ? (
+                  <p className="header-notification-message">
+                    No incidents with Advice, Watch and Act, or Emergency Warning
+                    classifications were returned by the feed.
+                  </p>
+                ) : (
+                  fireWarnings.slice(0, 8).map((warning) => (
+                    <div className="header-notification-item" key={warning.id}>
+                      <span
+                        className={`header-notification-level ${
+                          warning.category.trim().toLowerCase().replaceAll(" ", "-")
+                        }`}
+                      >
+                        {warning.category}
+                      </span>
+                      <strong>{warning.title}</strong>
+                      <span>{warning.location}</span>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              <div className="header-notification-footer">
+                <span>
+                  {warningsFetchedAt
+                    ? `Feed retrieved ${new Date(warningsFetchedAt).toLocaleTimeString("en-AU", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}`
+                    : "Feed status unavailable"}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setNotificationsOpen(false);
+                    onNavigate("Fire Warnings");
+                  }}
+                >
+                  View Fire Warnings
+                </button>
+              </div>
+
+              <p className="header-notification-disclaimer">
+                Not a real-time emergency alert service. Check NSW RFS for
+                official warnings.
+              </p>
+            </div>
+          )}
+        </div>
 
         <div className="header-divider" />
 
@@ -343,7 +511,10 @@ function Header({ setLocation }) {
 
                 <button
                   type="button"
-                  onClick={() => setProfileOpen(false)}
+                  onClick={() => {
+                    setProfileOpen(false);
+                    onNavigate("Settings");
+                  }}
                 >
                   <UserRound size={16} />
                   My Account
