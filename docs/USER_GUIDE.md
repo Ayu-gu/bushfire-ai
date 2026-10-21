@@ -178,20 +178,6 @@ For a live bushfire emergency, use official emergency channels instead of the co
 - Be aware that some external map and news services may not be fully accessible in every browser.
 - Do not use FireScope AI as a substitute for official warnings, local expertise, or an emergency plan.
 
-## 15. Quick demonstration walkthrough
-
-For a short classroom demonstration:
-
-1. Open the **Dashboard** and explain the educational purpose.
-2. Open **Risk Map** and select a sample location.
-3. Run **AI Prediction** and explain the displayed risk score and categories.
-4. Show **Fire Warnings**, clearly identifying the NSW RFS feed as an external source.
-5. Show **Climate News** as a separate informational feed.
-6. Sign in to demonstrate **Prediction History** and **Saved Locations**, if an appropriate demo account is available.
-7. Finish with the safety disclaimer and the distinction between experimental AI estimates and official fire warnings.
-
-## 16. Documentation and support
+## 15. Documentation and support
 
 Technical documentation is maintained in the project's `docs/` directory. The project repository is available at https://github.com/Ayu-gu/bushfire-ai. For implementation details, see `ARCHITECTURE.md`, `MACHINE_LEARNING.md`, `DATABASE_DESIGN.md`, and `TESTING.md`.
-
-**Verification note:** This guide is based on the reviewed navigation and authentication code and previously examined application architecture. Exact button labels, mobile layouts, and some end-to-end user flows should be checked against the deployed interface before final submission. No new end-to-end test is claimed by this document.
